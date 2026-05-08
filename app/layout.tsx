@@ -3,7 +3,7 @@ import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
-  title: 'ScentStack — Build Your Fragrance Wardrobe',
+  title: 'Your Scents — Build Your Fragrance Wardrobe',
   description:
     'Catalog your fragrance collection, discover optimal wear occasions for each scent, and find the best layering combinations using real note data from 70,000+ perfumes and colognes.',
   keywords: [
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     'perfume combinations',
   ],
   openGraph: {
-    title: 'ScentStack — Layer Your Fragrances Like a Pro',
+    title: 'Your Scents — Layer Your Fragrances Like a Pro',
     description:
       'Discover the best occasions and layering combos for every fragrance you own. Backed by real top, middle, and base note data.',
     type: 'website',

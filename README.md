@@ -1,8 +1,8 @@
-# ScentStack 🌸
+# Your Scents 🌸
 
 **The fragrance stacking app powered by real perfume data.**
 
-ScentStack lets users catalog their fragrance collection, analyze real scent notes, get occasion-based recommendations, and discover layering combinations that create entirely new scent profiles — all backed by the Fragella API (70,000+ fragrances).
+Your Scents lets users catalog their fragrance collection, analyze real scent notes, get occasion-based recommendations, and discover layering combinations that create entirely new scent profiles — all backed by the Fragella API (70,000+ fragrances).
 
 ## Features
 - 🔍 Search 70,000+ real fragrances via Fragella API

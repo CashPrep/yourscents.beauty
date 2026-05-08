@@ -22,7 +22,7 @@ export default function HomePage() {
           <Link href="/" className="flex items-center gap-2.5">
             <span className="text-[10px] editorial-cap text-muted-foreground tracking-widest">✦</span>
             <span className="text-lg font-medium tracking-tight" style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 500 }}>
-              ScentStack
+              Your Scents
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -56,7 +56,7 @@ export default function HomePage() {
               organized.
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed mb-12">
-              ScentStack analyzes the actual top, heart, and base notes of every fragrance you own —
+              Your Scents analyzes the actual top, heart, and base notes of every fragrance you own —
               then tells you when to wear them, how to layer them, and what occasions they were made for.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -102,7 +102,7 @@ export default function HomePage() {
                   the ratio of top-to-base determines what your skin reads first, last, and longest.
                 </p>
                 <p>
-                  ScentStack applies this logic algorithmically — cross-referencing the full note pyramids of your
+                  Your Scents applies this logic algorithmically — cross-referencing the full note pyramids of your
                   owned fragrances against thousands of documented accords to surface combinations that actually work.
                 </p>
               </div>
@@ -347,7 +347,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div>
               <p className="text-xl font-light mb-1" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                ScentStack
+                Your Scents
               </p>
               <p className="text-xs text-muted-foreground">
                 Built for the fragrance curious.
@@ -361,7 +361,7 @@ export default function HomePage() {
           </div>
           <div className="gold-line opacity-40 mt-10 mb-6" />
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} ScentStack. All rights reserved.
+            © {new Date().getFullYear()} Your Scents. All rights reserved.
           </p>
         </div>
       </footer>
