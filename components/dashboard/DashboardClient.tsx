@@ -26,8 +26,8 @@ type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna'
 
 const SORT_OPTIONS = [
   { value: 'recent', label: 'Recently Added' },
-  { value: 'name', label: 'Name A–Z' },
-  { value: 'brand', label: 'Brand A–Z' },
+  { value: 'name',   label: 'Name A–Z' },
+  { value: 'brand',  label: 'Brand A–Z' },
   { value: 'rating', label: 'Top Rated' },
 ]
 
@@ -43,7 +43,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   const [accordFilter, setAccordFilter] = useState('all')
   const [copied, setCopied] = useState(false)
   const plan = profile?.plan || 'free'
-  const isFirst = wardrobe.length === 0
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -51,17 +50,17 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const handleFragranceAdded = (item: any) => {
-    setWardrobe(prev => [item, ...prev])
+    setWardrobe((prev: any[]) => [item, ...prev])
     setShowAddModal(false)
   }
 
   const handleRemove = async (id: string) => {
     await fetch('/api/wardrobe', { method: 'DELETE', body: JSON.stringify({ id }), headers: { 'Content-Type': 'application/json' } })
-    setWardrobe(prev => prev.filter(i => i.id !== id))
+    setWardrobe((prev: any[]) => prev.filter((i: any) => i.id !== id))
   }
 
   const handleRatingUpdate = (id: string, rating: number, note: string) => {
-    setWardrobe(prev => prev.map(i => i.id === id ? { ...i, rating, personal_note: note } : i))
+    setWardrobe((prev: any[]) => prev.map((i: any) => i.id === id ? { ...i, rating, personal_note: note } : i))
   }
 
   const handleShare = () => {
@@ -72,10 +71,10 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const displayWardrobe = [...wardrobe]
-    .filter(item => accordFilter === 'all' || (item.accords || []).some((a: string) => a.toLowerCase().includes(accordFilter)))
-    .sort((a, b) => {
-      if (sort === 'name') return a.fragrance_name.localeCompare(b.fragrance_name)
-      if (sort === 'brand') return a.brand.localeCompare(b.brand)
+    .filter((item: any) => accordFilter === 'all' || (item.accords || []).some((a: string) => a.toLowerCase().includes(accordFilter)))
+    .sort((a: any, b: any) => {
+      if (sort === 'name')   return a.fragrance_name.localeCompare(b.fragrance_name)
+      if (sort === 'brand')  return a.brand.localeCompare(b.brand)
       if (sort === 'rating') return (b.rating || 0) - (a.rating || 0)
       return 0
     })
@@ -88,8 +87,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
     { id: 'dna',       label: 'Scent DNA', icon: Dna },
   ]
 
-  const avgRating = wardrobe.filter(i=>i.rating).length
-    ? (wardrobe.filter(i=>i.rating).reduce((s,i)=>s+(i.rating||0),0)/wardrobe.filter(i=>i.rating).length).toFixed(1)
+  const avgRating = wardrobe.filter((i: any) => i.rating).length
+    ? (wardrobe.filter((i: any) => i.rating).reduce((s: number, i: any) => s + (i.rating || 0), 0) / wardrobe.filter((i: any) => i.rating).length).toFixed(1)
     : null
 
   return (
@@ -138,4 +137,146 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-  
+            { label: 'Bottles', value: wardrobe.length, icon: Star },
+            { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—', icon: Sparkles },
+            { label: 'Plan', value: plan.charAt(0).toUpperCase() + plan.slice(1), icon: Zap },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="rounded-xl p-4 border border-border" style={{ background: 'hsl(220 16% 8%)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <Icon className="h-3.5 w-3.5" style={{ color: GOLD }} />
+                <span className="text-[11px] text-muted-foreground font-medium">{label}</span>
+              </div>
+              <p className="text-lg font-semibold tracking-tight">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+          {tabs.map(({ id, label, icon: Icon, badge }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium whitespace-nowrap transition-all"
+              style={
+                activeTab === id
+                  ? { background: GOLD_BG, color: GOLD, border: `1px solid hsl(42 85% 68% / 0.25)` }
+                  : { color: 'hsl(220 10% 48%)', border: '1px solid transparent' }
+              }
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+              {badge !== undefined && badge > 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: GOLD_BG, color: GOLD }}>{badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab: Wardrobe */}
+        {activeTab === 'wardrobe' && (
+          <div>
+            {/* Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div className="flex gap-2 flex-wrap">
+                {ACCORD_FILTERS.map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setAccordFilter(f)}
+                    className="text-[11px] px-3 py-1.5 rounded-full capitalize transition-colors"
+                    style={
+                      accordFilter === f
+                        ? { background: GOLD_BG, color: GOLD, border: '1px solid hsl(42 85% 68% / 0.25)' }
+                        : { background: 'hsl(220 16% 8%)', color: 'hsl(220 10% 48%)', border: '1px solid hsl(220 14% 14%)' }
+                    }
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={sort}
+                  onChange={e => setSort(e.target.value)}
+                  className="text-[12px] bg-card border border-border rounded-lg px-3 py-1.5 text-foreground"
+                >
+                  {SORT_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl"
+                  style={{ background: GOLD, color: 'hsl(220 18% 6%)' }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Empty state */}
+            {displayWardrobe.length === 0 && (
+              <div className="text-center py-20 border border-dashed border-border rounded-2xl">
+                <Sparkles className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm font-medium mb-2">Your wardrobe is empty</p>
+                <p className="text-xs text-muted-foreground mb-6">Add your first fragrance to get started</p>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="text-sm font-semibold px-6 py-2.5 rounded-xl"
+                  style={{ background: GOLD, color: 'hsl(220 18% 6%)' }}
+                >
+                  Add Fragrance
+                </button>
+              </div>
+            )}
+
+            {/* Grid */}
+            {displayWardrobe.length > 0 && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {displayWardrobe.map((item: any) => (
+                  <WardrobeCard
+                    key={item.id}
+                    item={item}
+                    onRemove={handleRemove}
+                    onRatingUpdate={handleRatingUpdate}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Stacks */}
+        {activeTab === 'stacks' && (
+          <StackSuggestions wardrobe={wardrobe} />
+        )}
+
+        {/* Tab: Occasions */}
+        {activeTab === 'occasions' && (
+          <OccasionPlanner wardrobe={wardrobe} />
+        )}
+
+        {/* Tab: Discover */}
+        {activeTab === 'discover' && (
+          <DiscoveryFeed wardrobe={wardrobe} />
+        )}
+
+        {/* Tab: Scent DNA */}
+        {activeTab === 'dna' && (
+          <ScentDNA wardrobe={wardrobe} />
+        )}
+
+      </div>
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <AddFragranceModal
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleFragranceAdded}
+        />
+      )}
+
+    </div>
+  )
+}
