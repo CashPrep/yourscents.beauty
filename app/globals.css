@@ -6,36 +6,26 @@
 
 @layer base {
   :root {
-    /* ── Deep obsidian dark base ── */
     --background: 220 18% 6%;
     --foreground: 220 15% 92%;
     --card: 220 16% 9%;
     --card-foreground: 220 15% 92%;
     --popover: 220 16% 9%;
     --popover-foreground: 220 15% 92%;
-
-    /* Champagne gold accent */
     --primary: 42 85% 68%;
     --primary-foreground: 220 18% 6%;
-
     --secondary: 220 14% 14%;
     --secondary-foreground: 220 15% 75%;
-
     --muted: 220 14% 14%;
     --muted-foreground: 220 10% 48%;
-
     --accent: 220 14% 16%;
     --accent-foreground: 220 15% 90%;
-
     --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 220 14% 15%;
     --input: 220 14% 15%;
     --ring: 42 85% 68%;
     --radius: 0.875rem;
-
-    /* Custom tokens */
     --gold: 42 85% 68%;
     --gold-dim: 42 60% 42%;
     --gold-glow: 42 85% 68% / 0.18;
@@ -47,14 +37,8 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -63,27 +47,17 @@
       radial-gradient(ellipse 80% 40% at 50% -10%, hsl(42 85% 68% / 0.07) 0%, transparent 70%),
       radial-gradient(ellipse 60% 30% at 100% 100%, hsl(260 40% 30% / 0.08) 0%, transparent 60%);
   }
-
   h1, h2, h3, h4, .serif {
     font-family: 'Playfair Display', Georgia, serif;
     letter-spacing: -0.01em;
   }
-
-  ::selection {
-    background: hsl(42 85% 68% / 0.22);
-  }
+  ::selection { background: hsl(42 85% 68% / 0.22); }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 
-  /* ── Gold gradient text ── */
-  .text-gold {
-    color: hsl(var(--gold));
-  }
-
+  .text-gold { color: hsl(var(--gold)); }
   .text-gold-gradient {
     background: linear-gradient(135deg, hsl(42 90% 75%) 0%, hsl(42 70% 55%) 100%);
     -webkit-background-clip: text;
@@ -91,7 +65,6 @@
     background-clip: text;
   }
 
-  /* ── Label / eyebrow text ── */
   .eyebrow {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.65rem;
@@ -101,14 +74,12 @@
     color: hsl(var(--gold));
   }
 
-  /* ── Pill chip ── */
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium;
     background: hsl(42 85% 68% / 0.10);
     color: hsl(var(--gold));
     border: 1px solid hsl(42 85% 68% / 0.25);
   }
-
   .chip-muted {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium;
     background: hsl(220 14% 14%);
@@ -116,13 +87,11 @@
     border: 1px solid hsl(220 14% 20%);
   }
 
-  /* ── Panel / card ── */
   .panel {
     background: hsl(var(--panel));
     border: 1px solid hsl(var(--panel-edge));
     border-radius: var(--radius);
   }
-
   .panel-glow {
     background: hsl(var(--panel));
     border: 1px solid hsl(42 85% 68% / 0.22);
@@ -130,19 +99,16 @@
     box-shadow: 0 0 0 1px hsl(42 85% 68% / 0.06), 0 8px 40px hsl(42 85% 68% / 0.08);
   }
 
-  /* ── Grid line divider ── */
   .rule {
     background: linear-gradient(90deg, transparent, hsl(220 14% 20%), transparent);
     height: 1px;
     width: 100%;
   }
 
-  /* ── Hero gradient ── */
   .hero-bg {
     background: linear-gradient(170deg, hsl(220 20% 7%) 0%, hsl(220 18% 6%) 60%, hsl(260 16% 7%) 100%);
   }
 
-  /* ── Frosted glass for floating elements ── */
   .glass {
     background: hsl(220 18% 8% / 0.80);
     backdrop-filter: blur(20px) saturate(1.4);
@@ -151,7 +117,6 @@
     border-radius: var(--radius);
   }
 
-  /* ── Note dot ── */
   .note-dot {
     width: 6px;
     height: 6px;
@@ -161,7 +126,6 @@
     margin-top: 7px;
   }
 
-  /* ── Glow button ── */
   .btn-gold {
     background: linear-gradient(135deg, hsl(42 85% 68%) 0%, hsl(42 70% 58%) 100%);
     color: hsl(220 18% 6%);
@@ -170,20 +134,14 @@
     transition: opacity 0.15s, transform 0.15s;
     box-shadow: 0 4px 24px hsl(42 85% 68% / 0.28);
   }
+  .btn-gold:hover { opacity: 0.92; transform: translateY(-1px); }
 
-  .btn-gold:hover {
-    opacity: 0.92;
-    transform: translateY(-1px);
-  }
-
-  /* ── Score bar ── */
   .score-bar-bg {
     background: hsl(220 14% 16%);
     border-radius: 999px;
     height: 4px;
     overflow: hidden;
   }
-
   .score-bar-fill {
     height: 100%;
     border-radius: 999px;
@@ -191,7 +149,6 @@
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* ── Hover lift ── */
   .lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -200,7 +157,6 @@
     box-shadow: 0 12px 40px hsl(0 0% 0% / 0.35);
   }
 
-  /* ── Occasion button ── */
   .occasion-btn {
     @apply flex flex-col items-center gap-2 rounded-xl p-4 text-center transition-all cursor-pointer;
     background: hsl(220 16% 9%);
@@ -214,5 +170,89 @@
     border-color: hsl(42 85% 68% / 0.7);
     background: hsl(42 85% 68% / 0.06);
     box-shadow: 0 0 0 1px hsl(42 85% 68% / 0.15), inset 0 0 20px hsl(42 85% 68% / 0.04);
+  }
+
+  /* ── Article / Blog prose ── */
+  .prose-article {
+    color: hsl(220 15% 78%);
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .prose-article p {
+    margin-bottom: 1.5rem;
+  }
+  .prose-article h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: hsl(220 15% 92%);
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  .prose-article h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: hsl(var(--gold));
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose-article ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+  .prose-article ul li {
+    padding-left: 1.25rem;
+    position: relative;
+    margin-bottom: 0.75rem;
+    color: hsl(220 15% 72%);
+  }
+  .prose-article ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: hsl(var(--gold));
+  }
+  .prose-article strong {
+    color: hsl(220 15% 90%);
+    font-weight: 600;
+  }
+
+  /* Callout block */
+  .callout {
+    background: hsl(220 16% 10%);
+    border: 1px solid hsl(220 14% 18%);
+    border-left: 3px solid hsl(var(--gold));
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .callout p { margin-bottom: 0.5rem; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: hsl(var(--gold)) !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* CTA block */
+  .cta-block {
+    background: hsl(42 85% 68% / 0.07);
+    border: 1px solid hsl(42 85% 68% / 0.2);
+    border-radius: var(--radius);
+    padding: 1.75rem 2rem;
+    margin-top: 3rem;
   }
 }
