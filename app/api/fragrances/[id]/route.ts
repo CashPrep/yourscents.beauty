@@ -1,22 +1,15 @@
 import { NextResponse } from 'next/server'
 
-export async function GET(
-  request: Request,
-  context: any
-) {
-  const id = context.params.id
+export async function GET(request: Request, context: any) {
+  const id = context.params?.id
   try {
-    const response = await fetch(
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_FRAGELLA_BASE_URL}/v1/fragrances/${id}`,
-      {
-        headers: { 'Authorization': `Bearer ${process.env.FRAGELLA_API_KEY}` },
-        next: { revalidate: 86400 },
-      }
+      { headers: { Authorization: `Bearer ${process.env.FRAGELLA_API_KEY}` } }
     )
-    if (!response.ok) throw new Error('Not found')
-    const data = await response.json()
-    return NextResponse.json(data)
+    if (!res.ok) throw new Error('Not found')
+    return NextResponse.json(await res.json())
   } catch {
-    return NextResponse.json({ error: 'Fragrance not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 }
