@@ -13,7 +13,6 @@ import DiscoveryFeed from './DiscoveryFeed'
 import StackSuggestions from './StackSuggestions'
 import MoodMatcher from './MoodMatcher'
 import SeasonalRotation from './SeasonalRotation'
-import Link from 'next/link'
 
 const GOLD = 'hsl(42 85% 68%)'
 const GOLD_BG = 'hsl(42 85% 68% / 0.10)'
@@ -140,9 +139,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: 'Bottles',    value: wardrobe.length,                                              icon: Star },
-            { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—',                          icon: Sparkles },
-            { label: 'Plan',       value: plan.charAt(0).toUpperCase() + plan.slice(1),                  icon: Zap },
+            { label: 'Bottles',    value: wardrobe.length,                                    icon: Star },
+            { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—',               icon: Sparkles },
+            { label: 'Plan',       value: plan.charAt(0).toUpperCase() + plan.slice(1),       icon: Zap },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-xl p-4 border border-border" style={{ background: 'hsl(220 16% 8%)' }}>
               <div className="flex items-center gap-2 mb-1">
@@ -263,6 +262,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         <AddFragranceModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleFragranceAdded}
+          wardrobe={wardrobe}
         />
       )}
 
