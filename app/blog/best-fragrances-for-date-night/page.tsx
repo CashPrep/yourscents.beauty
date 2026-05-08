@@ -33,34 +33,34 @@ export default function ArticlePage() {
             <span className="text-[11px] font-mono" style={{ color: MUTED }}>6 min read · May 2026</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-normal serif leading-tight mb-5" style={{ color: FG }}>The Best Fragrances for Date Night (And How to Stack Them)</h1>
-          <p className="text-lg leading-relaxed" style={{ color: MUTED }}>Not all date night fragrances are created equal. Some project too loud. Some fade before dinner ends. Here's what actually works.</p>
+          <p className="text-lg leading-relaxed" style={{ color: MUTED }}>Not all date night fragrances are created equal. Some project too loud. Some fade before dinner ends. Here&apos;s what actually works.</p>
         </div>
 
         <div className="prose-article">
-          <p>Date night fragrance has a specific brief: intimate projection, moderate-to-strong longevity, and a character that's interesting close-up without being aggressive at arm's length. Most fragrances fail at least one of those criteria.</p>
+          <p>Date night fragrance has a specific brief: intimate projection, moderate-to-strong longevity, and a character that&apos;s interesting close-up without being aggressive at arm&apos;s length. Most fragrances fail at least one of those criteria.</p>
 
-          <h2>What "intimate projection" actually means</h2>
-          <p>Projection is how far a fragrance radiates from skin. Sillage is the trail it leaves. For date night, you want a fragrance that's noticeable within 1–2 feet but doesn't arrive in the room before you do. Heavy ambroxan-based fragrances (Sauvage, most flankers) project too broadly. Skin-scent musks (Glossier You, Maison Margiela Replica Lazy Sunday Morning) project well within close range but may be too subtle for an opening statement.</p>
+          <h2>What &ldquo;intimate projection&rdquo; actually means</h2>
+          <p>Projection is how far a fragrance radiates from skin. Sillage is the trail it leaves. For date night, you want a fragrance that&apos;s noticeable within 1–2 feet but doesn&apos;t arrive in the room before you do. Heavy ambroxan-based fragrances (Sauvage, most flankers) project too broadly. Skin-scent musks (Glossier You, Maison Margiela Replica Lazy Sunday Morning) project well within close range but may be too subtle for an opening statement.</p>
           <p>The sweet spot: oriental-florals and musky-florals. They project warmly without diffusing widely. Black Opium, YSL Libre, Lancôme La Vie Est Belle, Viktor &amp; Rolf Flowerbomb all hit this range.</p>
 
           <div className="callout">
             <p className="callout-title">Black Opium + Flowerbomb</p>
-            <p>Apply Flowerbomb first — it's the louder, richer of the two and needs to settle. Wait five minutes. Then add one spray of Black Opium to the wrists. The coffee-vanilla of Black Opium merges with the sweet-floral of Flowerbomb and creates a single, more complex accord than either achieves alone. The combination has exceptional longevity — both fragrances have strong base notes that anchor each other.</p>
+            <p>Apply Flowerbomb first — it&apos;s the louder, richer of the two and needs to settle. Wait five minutes. Then add one spray of Black Opium to the wrists. The coffee-vanilla of Black Opium merges with the sweet-floral of Flowerbomb and creates a single, more complex accord than either achieves alone. The combination has exceptional longevity — both fragrances have strong base notes that anchor each other.</p>
           </div>
 
           <div className="callout">
             <p className="callout-title">YSL Libre + Mugler Alien</p>
-            <p>This is a more unusual pairing. Libre is a lavender-orange blossom-musk built around a gender-fluid tension between floral and aromatic. Alien is a white floral amber — Casablanca lily over white amber. The two share a warmth and a slightly abstract quality that makes the combination smell expensive and hard to identify. Apply Alien first (it's heavier), then Libre on top. Moderate projection, very good longevity.</p>
+            <p>This is a more unusual pairing. Libre is a lavender-orange blossom-musk built around a gender-fluid tension between floral and aromatic. Alien is a white floral amber — Casablanca lily over white amber. The two share a warmth and a slightly abstract quality that makes the combination smell expensive and hard to identify. Apply Alien first (it&apos;s heavier), then Libre on top. Moderate projection, very good longevity.</p>
           </div>
 
-          <h2>Fragrances that don't work for date night</h2>
-          <p>Aquatics and fresh citruses fade too quickly — you'll be unscented by the main course. Heavy ouds project too broadly and read as high-effort. Extremely linear fragrances (same note from application to drydown) don't reward closeness — part of what makes a fragrance attractive is the way it evolves over time.</p>
+          <h2>Fragrances that don&apos;t work for date night</h2>
+          <p>Aquatics and fresh citruses fade too quickly — you&apos;ll be unscented by the main course. Heavy ouds project too broadly and read as high-effort. Extremely linear fragrances (same note from application to drydown) don&apos;t reward closeness — part of what makes a fragrance attractive is the way it evolves over time.</p>
 
           <h2>Longevity: how to make it last</h2>
           <ul>
             <li>Apply to moisturised skin — fragrance clings to hydration; dry skin burns through scent fast</li>
             <li>Pulse points only — wrists, neck, behind ears, inner elbows; heat projects the scent</li>
-            <li>Don't reapply mid-evening — you'll over-apply and kill the subtlety you built</li>
+            <li>Don&apos;t reapply mid-evening — you&apos;ll over-apply and kill the subtlety you built</li>
             <li>Fragrance on hair lasts longest of all — one very light spray on a brush, then run through hair</li>
           </ul>
 
