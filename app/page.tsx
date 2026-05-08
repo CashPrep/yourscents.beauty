@@ -388,7 +388,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
 
       {/* ── NAV ── */}
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-xl">
+      {/* FIX: Changed bg-background/85 to bg-background (fully opaque) so the logo photo has no color mismatch */}
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo — full image, flush, no cropping */}
           <Link href="/" className="flex items-center gap-0">
@@ -703,6 +704,55 @@ export default function HomePage() {
 
         <div className="max-w-4xl mx-auto px-6"><div className="rule opacity-50" /></div>
 
+        {/* ── WHY I BUILT THIS — moved here, center of page, between How It Works and Pricing ── */}
+        <section className="py-28 px-6">
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${R_BG}, hsl(8 56% 76% / 0.22))`, border: `1px solid ${R_BORDER}`, boxShadow: `0 4px 24px hsl(8 56% 76% / 0.18)` }}
+              >
+                <Heart size={26} strokeWidth={1.5} style={{ color: R }} fill={R} />
+              </div>
+            </div>
+
+            <p className="eyebrow mb-3">Why I Built This</p>
+            <h2 className="text-3xl md:text-4xl font-normal serif mb-10" style={{ color: R_DEEP }}>
+              Built with love.
+            </h2>
+
+            {/* Card */}
+            <div
+              className="rounded-3xl px-10 py-10 text-left space-y-6 relative overflow-hidden"
+              style={{
+                background: 'hsl(0 0% 100%)',
+                border: `1px solid ${R_BORDER}`,
+                boxShadow: `0 20px 60px hsl(8 56% 76% / 0.15), 0 2px 8px hsl(8 56% 76% / 0.08)`,
+              }}
+            >
+              {/* Decorative rose tint top strip */}
+              <div
+                className="absolute inset-x-0 top-0 h-1 rounded-t-3xl"
+                style={{ background: `linear-gradient(90deg, transparent, ${R}, transparent)` }}
+              />
+
+              <p className="text-[16px] leading-[1.85] text-foreground font-normal">
+                I built this in honor of the most amazing girl in the entire world. She is brilliant, caring, loving, thoughtful — I could go on forever, but in short I love this girl.
+              </p>
+
+              {/* Divider */}
+              <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${R_BORDER}, transparent)` }} />
+
+              <p className="text-[16px] leading-[1.85] text-foreground italic serif">
+                P.S. I love you to the moon and back 🌙
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="max-w-4xl mx-auto px-6"><div className="rule opacity-50" /></div>
+
         {/* ── PRICING ── */}
         <section id="pricing" className="py-28 px-6">
           <div className="max-w-5xl mx-auto">
@@ -814,29 +864,6 @@ export default function HomePage() {
                   <button className="btn-gold px-10 py-3 text-sm">Build My Wardrobe</button>
                 </Link>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── WHY I BUILT THIS ── */}
-        <section className="py-20 px-6">
-          <div className="max-w-xl mx-auto text-center">
-            <div className="flex justify-center mb-5">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: R_BG }}>
-                <Heart size={20} strokeWidth={1.5} style={{ color: R }} fill={R} />
-              </div>
-            </div>
-            <p className="eyebrow mb-4">Why I Built This</p>
-            <div
-              className="rounded-2xl px-10 py-10 text-left space-y-5"
-              style={{ background: 'hsl(0 0% 100%)', border: `1px solid ${R_BORDER}`, boxShadow: `0 8px 40px hsl(8 56% 76% / 0.12)` }}
-            >
-              <p className="text-[15px] leading-relaxed text-foreground">
-                I built this in honor of the most amazing girl in the entire world. She is brilliant, caring, loving, thoughtful — I could go on forever, but in short I love this girl.
-              </p>
-              <p className="text-[15px] leading-relaxed text-foreground italic serif">
-                P.S. I love you to the moon and back 🌙
-              </p>
             </div>
           </div>
         </section>
