@@ -2,14 +2,36 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request, context: any) {
   const id = context.params?.id
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_FRAGELLA_BASE_URL}/v1/fragrances/${id}`,
-      { headers: { Authorization: `Bearer ${process.env.FRAGELLA_API_KEY}` } }
-    )
-    if (!res.ok) throw new Error('Not found')
-    return NextResponse.json(await res.json())
-  } catch {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  // ── Primary: Fragella ─────────────────────────────────────────────────────
+  if (process.env.FRAGELLA_API_KEY && process.env.FRAGELLA_API_KEY !== 'your_fragella_api_key') {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_FRAGELLA_BASE_URL}/v1/fragrances/${id}`,
+        { headers: { Authorization: `Bearer ${process.env.FRAGELLA_API_KEY}` }, next: { revalidate: 3600 } }
+      )
+      if (res.ok) return NextResponse.json(await res.json())
+    } catch { /* fall through */ }
   }
+
+  // ── Backup: RapidAPI ─────────────────────────────────────────────────────
+  if (process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key') {
+    try {
+      const res = await fetch(
+        `https://perfumes-and-fragrances.p.rapidapi.com/fragrances/${id}`,
+        {
+          headers: {
+            'x-rapidapi-host': 'perfumes-and-fragrances.p.rapidapi.com',
+            'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+          },
+          next: { revalidate: 3600 },
+        }
+      )
+      if (res.ok) return NextResponse.json(await res.json())
+    } catch { /* fall through */ }
+  }
+
+  // If demo ID (from search fallback) just return 404 — notes already embedded
+  return NextResponse.json({ error: 'Not found' }, { status: 404 })
 }
