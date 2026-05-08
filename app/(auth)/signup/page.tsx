@@ -22,25 +22,37 @@ function SignupForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signUp({
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: name, plan },
-        // Skip email confirmation — go straight to app
         emailRedirectTo: undefined,
       },
     })
-    if (error) {
-      setError(error.message)
+
+    if (signUpError) {
+      setError(signUpError.message)
       setLoading(false)
-    } else {
-      // Always go to dashboard immediately — no email verification step
-      if (plan !== 'free') {
-        router.push(`/api/checkout?plan=${plan}`)
-      } else {
-        router.push('/dashboard')
+      return
+    }
+
+    // If Supabase didn't return a session (email confirmation still on),
+    // force sign-in immediately so the user lands in the app logged in.
+    if (!data.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) {
+        setError('Account created — please sign in.')
+        router.push('/login')
+        return
       }
+    }
+
+    if (plan !== 'free') {
+      router.push(`/api/checkout?plan=${plan}`)
+    } else {
+      router.push('/dashboard')
     }
   }
 
