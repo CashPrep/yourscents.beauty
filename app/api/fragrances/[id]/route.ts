@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  context: any
 ) {
-  const { id } = await params
+  const id = context.params.id
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_FRAGELLA_BASE_URL}/v1/fragrances/${id}`,
