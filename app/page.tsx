@@ -1,21 +1,20 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import {
   Search, Layers, CalendarDays, FlaskConical,
   ArrowRight, Check, Sparkles, Heart,
   Plus, Minus, Droplets, Wind, Flame, Clock, TrendingUp,
-  Activity, Cpu,
+  Activity, Cpu, X,
 } from 'lucide-react'
 
-// ── Rose palette tokens (matches globals.css YS logo colors) ────────────────
-const R       = 'hsl(8 48% 72%)'       // dusty rose
-const R_DEEP  = 'hsl(3 40% 58%)'       // mauve rose
-const R_BG    = 'hsl(8 56% 76% / 0.12)'
+// ── Rose palette tokens (matches globals.css) ────────────────────────────────
+const R        = 'hsl(8 48% 72%)'
+const R_DEEP   = 'hsl(3 40% 58%)'
+const R_BG     = 'hsl(8 56% 76% / 0.12)'
 const R_BORDER = 'hsl(8 56% 76% / 0.32)'
-
-const LOGO_URL = 'https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/67238f7d-e958-42c4-9876-33b89144adfd.png'
 
 const PHOTOS = {
   hero:  'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=900&q=90&fit=crop',
@@ -117,10 +116,20 @@ const LAYERING_TIPS = [
   { icon: Clock,      title: 'Wait Between Layers',     body: 'Give each scent 2–5 minutes between applications. This prevents the top notes from fighting each other and allows each fragrance to open fully.' },
   { icon: Activity,   title: 'Pulse Points Only',       body: 'Apply to wrists, neck, inner elbows, and behind ears. These warm points project scent outward. Never rub — it crushes the top notes and breaks the accord.' },
   { icon: Wind,       title: 'Layer by Longevity',      body: 'Place shorter-lived scents (florals, citrus) on top of long-lasting bases (woody, oriental). As the top layer fades, the base continues to evolve and deepen.' },
-  { icon: TrendingUp, title: 'Start Light, Build Up',   body: 'You can always add more — you can never remove. Use half your usual sprays per fragrance when layering. One-spray-each is often the perfect starting point.' },
+  { icon: TrendingUp, title: 'Start Light, Build Up',   body: "You can always add more — you can never remove. Use half your usual sprays per fragrance when layering. One-spray-each is often the perfect starting point." },
 ]
 
-// ─── COMPONENTS ─────────────────────────────────────────────────────────────
+// ─── FRAGRANCE SEARCH TYPES ──────────────────────────────────────────────────
+type SearchResult = {
+  id: string
+  name: string
+  brand: string
+  image_url?: string | null
+  accords: string[]
+  notes: { top: string[]; middle: string[]; base: string[] }
+}
+
+// ─── COMPONENTS ──────────────────────────────────────────────────────────────
 
 function NoteBar({ label, value, color = R }: { label: string; value: number; color?: string }) {
   return (
@@ -346,6 +355,202 @@ function InventorySuggester() {
   )
 }
 
+// ─── LIVE FRAGRANCE SEARCH SECTION ───────────────────────────────────────────
+function LiveSearchSection() {
+  const [query, setQuery]           = useState('')
+  const [results, setResults]       = useState<SearchResult[]>([])
+  const [loading, setLoading]       = useState(false)
+  const [selected, setSelected]     = useState<SearchResult | null>(null)
+  const [stack, setStack]           = useState<SearchResult[]>([])
+  const debounceRef                 = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Debounced search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (query.trim().length < 2) { setResults([]); return }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const res  = await fetch(`/api/fragrances/search?q=${encodeURIComponent(query)}`)
+        const data = await res.json()
+        setResults(data.results || [])
+      } catch { setResults([]) }
+      finally  { setLoading(false) }
+    }, 320)
+  }, [query])
+
+  const addToStack = (f: SearchResult) => {
+    if (stack.length >= 4) return
+    if (stack.find(s => s.id === f.id)) return
+    setStack(prev => [...prev, f])
+    setQuery('')
+    setResults([])
+    setSelected(null)
+  }
+
+  const removeFromStack = (id: string) => setStack(prev => prev.filter(f => f.id !== id))
+
+  return (
+    <div>
+      {/* Search input */}
+      <div className="relative max-w-lg mx-auto mb-8">
+        <div className="relative">
+          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search 70,000+ fragrances — try \"Chanel\", \"oud\", \"Sauvage\"…"
+            className="w-full pl-10 pr-10 py-3 rounded-full text-sm border bg-card outline-none transition-colors"
+            style={{ borderColor: query ? R_BORDER : 'hsl(10 25% 86%)', boxShadow: query ? `0 0 0 3px ${R_BG}` : 'none' }}
+          />
+          {query && (
+            <button onClick={() => { setQuery(''); setResults([]) }} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        {/* Dropdown results */}
+        {(loading || results.length > 0) && (
+          <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border bg-card shadow-lg overflow-hidden z-30" style={{ borderColor: R_BORDER, boxShadow: `0 16px 48px hsl(8 30% 60% / 0.16)` }}>
+            {loading && (
+              <div className="px-5 py-4 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: R, borderTopColor: 'transparent' }} />
+                Searching...
+              </div>
+            )}
+            {!loading && results.map(f => (
+              <button
+                key={f.id}
+                onClick={() => { setSelected(f); setQuery(''); setResults([]) }}
+                className="w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-[hsl(8_56%_76%_/_0.07)] transition-colors border-b last:border-b-0"
+                style={{ borderColor: 'hsl(10 25% 92%)' }}
+              >
+                {f.image_url ? (
+                  <img src={f.image_url} alt={f.name} className="w-9 h-9 rounded-lg object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} />
+                ) : (
+                  <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: R_BG }}>
+                    <FlaskConical size={14} style={{ color: R }} strokeWidth={1.5} />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{f.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{f.brand}</p>
+                </div>
+                {f.accords?.slice(0, 2).map(a => (
+                  <span key={a} className="chip shrink-0 hidden sm:inline-flex" style={{ fontSize: '9px', padding: '2px 7px' }}>{a}</span>
+                ))}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Selected fragrance detail */}
+      {selected && (
+        <div className="panel-glow p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-start gap-4">
+            {selected.image_url ? (
+              <img src={selected.image_url} alt={selected.name} className="w-16 h-20 rounded-xl object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} />
+            ) : (
+              <div className="w-16 h-20 rounded-xl shrink-0 flex items-center justify-center" style={{ background: R_BG }}>
+                <FlaskConical size={22} style={{ color: R }} strokeWidth={1.5} />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow mb-1">{selected.brand}</p>
+              <h3 className="text-lg font-medium serif mb-3">{selected.name}</h3>
+              {selected.accords?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {selected.accords.slice(0, 5).map(a => (
+                    <span key={a} className="chip" style={{ fontSize: '10px', padding: '2px 8px' }}>{a}</span>
+                  ))}
+                </div>
+              )}
+              {(selected.notes.top?.length > 0 || selected.notes.middle?.length > 0) && (
+                <div className="space-y-1.5">
+                  {selected.notes.top?.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      <span className="font-medium" style={{ color: 'hsl(190 45% 52%)' }}>Top: </span>
+                      {selected.notes.top.slice(0, 4).join(', ')}
+                    </p>
+                  )}
+                  {selected.notes.middle?.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      <span className="font-medium" style={{ color: R }}>Heart: </span>
+                      {selected.notes.middle.slice(0, 4).join(', ')}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <button
+                onClick={() => addToStack(selected)}
+                disabled={stack.length >= 4 || !!stack.find(s => s.id === selected.id)}
+                className="btn-gold px-4 py-2 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {stack.find(s => s.id === selected.id) ? 'Added' : '+ Add to Stack'}
+              </button>
+              <button onClick={() => setSelected(null)} className="text-xs text-muted-foreground hover:text-foreground transition-colors py-1">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Built stack */}
+      {stack.length > 0 && (
+        <div className="rounded-2xl p-6" style={{ background: R_BG, border: `1px solid ${R_BORDER}` }}>
+          <div className="flex items-center justify-between mb-4">
+            <p className="eyebrow">Your Stack ({stack.length}/4)</p>
+            <button onClick={() => setStack([])} className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {stack.map((f, i) => (
+              <div key={f.id} className="flex items-center gap-2">
+                {i > 0 && <span className="text-xs font-light" style={{ color: R_DEEP }}>+</span>}
+                <div className="flex items-center gap-2 bg-card rounded-full pl-2 pr-3 py-1.5 border" style={{ borderColor: R_BORDER }}>
+                  {f.image_url && <img src={f.image_url} alt={f.name} className="w-5 h-5 rounded-full object-cover" />}
+                  <span className="text-[12px] font-medium">{f.name}</span>
+                  <button onClick={() => removeFromStack(f.id)} className="text-muted-foreground hover:text-foreground ml-0.5">
+                    <X size={10} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {stack.length >= 2 && (
+            <div className="mt-5 pt-4 border-t" style={{ borderColor: R_BORDER }}>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Stack tip:</span>{' '}
+                Apply the heaviest base notes first, wait 2–3 minutes between each layer. Sign up to unlock full compatibility scoring for this combination.
+              </p>
+              <Link href="/signup">
+                <button className="btn-gold mt-3 px-5 py-2 text-xs">Get Full Analysis →</button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Empty state hint */}
+      {stack.length === 0 && !selected && !query && (
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">Search any fragrance above to explore notes and build your stack.</p>
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            {['Chanel No. 5', 'Dior Sauvage', 'Black Opium', 'Oud Wood', 'Jo Malone'].map(hint => (
+              <button key={hint} onClick={() => setQuery(hint)} className="chip-muted text-xs px-3 py-1.5">{hint}</button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
@@ -363,41 +568,75 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   )
 }
 
+// ─── EMAIL CAPTURE (wired to /api/email) ─────────────────────────────────────
 function EmailCapture() {
-  const [email, setEmail] = useState('')
-  const [done, setDone] = useState(false)
-  const submit = (e: React.FormEvent) => { e.preventDefault(); if (email) setDone(true) }
-  return done ? (
+  const [email,   setEmail]   = useState('')
+  const [loading, setLoading] = useState(false)
+  const [done,    setDone]    = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      if (res.ok) {
+        setDone(true)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'Something went wrong — please try again.')
+      }
+    } catch {
+      setError('Network error — please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (done) return (
     <div className="text-center py-4">
-      <p className="text-sm font-semibold mb-1" style={{ color: R }}>You&apos;re on the list.</p>
+      <p className="text-sm font-semibold mb-1" style={{ color: R }}>You&apos;re on the list. 🌸</p>
       <p className="text-xs text-muted-foreground">Your free scent profile is on its way.</p>
     </div>
-  ) : (
+  )
+
+  return (
     <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-      <Input type="email" required placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} className="rounded-full flex-1 text-sm px-5 bg-card border-border h-11" />
-      <button type="submit" className="btn-gold px-7 py-2.5 text-sm shrink-0">Get Free Profile</button>
+      <Input
+        type="email"
+        required
+        placeholder="your@email.com"
+        value={email}
+        onChange={e => { setEmail(e.target.value); setError(null) }}
+        className="rounded-full flex-1 text-sm px-5 bg-card border-border h-11"
+        disabled={loading}
+      />
+      <button type="submit" className="btn-gold px-7 py-2.5 text-sm shrink-0 disabled:opacity-60" disabled={loading}>
+        {loading ? 'Saving…' : 'Get Free Profile'}
+      </button>
+      {error && <p className="w-full text-xs text-center mt-1" style={{ color: R_DEEP }}>{error}</p>}
     </form>
   )
 }
 
 // ─── MAIN PAGE ───────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'occasion' | 'inventory' | 'explore'>('occasion')
+  const [activeTab, setActiveTab] = useState<'occasion' | 'inventory' | 'explore' | 'search'>('occasion')
 
   return (
     <div className="min-h-screen bg-background text-foreground">
 
       {/* ── NAV ── */}
-      {/* FIX: Changed bg-background/85 to bg-background (fully opaque) so the logo photo has no color mismatch */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo — full image, flush, no cropping */}
           <Link href="/" className="flex items-center gap-0">
-            <img
-              src={LOGO_URL}
-              alt="Your Scents Logo"
-              className="h-12 w-auto object-contain"
-            />
+            <Image src="/logo.png" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <Link href="#stack"      className="hover:text-foreground transition-colors">Stack Builder</Link>
@@ -417,28 +656,22 @@ export default function HomePage() {
 
         {/* ── HERO ── */}
         <section className="hero-bg pt-40 pb-32 px-6 relative overflow-hidden">
-          {/* Soft petal scanline */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-50" style={{ background: `linear-gradient(90deg, transparent, ${R}, transparent)` }} />
-
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center relative z-10">
             <div>
-              {/* Badge — just fragrance count, no Live pill */}
               <div className="flex items-center gap-2 mb-8">
                 <div className="chip flex items-center gap-1.5">
                   <Cpu size={9} style={{ color: R }} />
                   <span>70,000+ fragrances</span>
                 </div>
               </div>
-
               <h1 className="text-5xl md:text-[3.5rem] leading-[1.08] font-normal text-balance mb-6 serif">
                 Your fragrance wardrobe,{' '}
                 <em className="italic" style={{ color: R }}>intelligently layered.</em>
               </h1>
-
               <p className="text-[15px] text-muted-foreground max-w-md leading-relaxed mb-10">
                 Your Scents decodes every note in your collection and tells you exactly how to stack them — by vibe, occasion, or chemistry. No guesswork.
               </p>
-
               <div className="flex flex-col sm:flex-row items-start gap-3 mb-14">
                 <Link href="/signup">
                   <button className="btn-gold px-8 py-3 text-sm">Build My Wardrobe — Free</button>
@@ -449,13 +682,10 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-
-            {/* Hero visual */}
             <div className="relative hidden md:block">
               <div className="aspect-[4/5] w-full max-w-sm ml-auto overflow-hidden rounded-2xl" style={{ boxShadow: '0 32px 80px hsl(8 30% 60% / 0.22)' }}>
                 <img src={PHOTOS.hero} alt="Fragrance collection" className="w-full h-full object-cover" style={{ filter: 'brightness(0.92) saturate(0.9)' }} />
               </div>
-              {/* Floating analysis card */}
               <div className="glass absolute -bottom-6 -left-8 px-5 py-4 min-w-[168px]">
                 <p className="eyebrow mb-2.5">Note Analysis</p>
                 <div className="space-y-2">
@@ -463,7 +693,6 @@ export default function HomePage() {
                   <NoteBar label="Projection" value={88} />
                 </div>
               </div>
-              {/* Floating stack pill */}
               <div className="glass absolute top-8 -right-6 px-4 py-3.5 max-w-[200px]">
                 <p className="eyebrow mb-2">Tonight&apos;s stack</p>
                 <p className="text-sm font-medium serif mb-2">Dark Romance</p>
@@ -508,14 +737,15 @@ export default function HomePage() {
                 <em className="italic" style={{ color: R }}>Every time.</em>
               </h2>
               <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
-                Choose an occasion, explore your inventory, or browse curated combinations — all scored by note compatibility.
+                Search real fragrances, explore curated combinations, or filter by occasion — all scored by note compatibility.
               </p>
             </div>
 
-            {/* Tab switcher */}
+            {/* Tab switcher — now includes Search tab */}
             <div className="flex justify-center mb-12">
               <div className="flex items-center gap-1 p-1 rounded-2xl" style={{ background: 'hsl(10 50% 95%)', border: '1px solid hsl(10 30% 88%)' }}>
                 {([
+                  { id: 'search',    label: 'Search',      icon: Search },
                   { id: 'occasion',  label: 'By Occasion', icon: CalendarDays },
                   { id: 'inventory', label: 'My Wardrobe',  icon: Layers },
                   { id: 'explore',   label: 'Explore All',  icon: Sparkles },
@@ -537,6 +767,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {activeTab === 'search'    && <LiveSearchSection />}
             {activeTab === 'occasion'  && <OccasionPlanner />}
             {activeTab === 'inventory' && <InventorySuggester />}
             {activeTab === 'explore'   && (
@@ -581,10 +812,9 @@ export default function HomePage() {
                 <em className="italic" style={{ color: R }}>a pro.</em>
               </h2>
               <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
-                The difference between a great stack and a great fragrance is technique. These six principles are what separate collectors from enthusiasts.
+                The difference between a great stack and a great fragrance is technique.
               </p>
             </div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {LAYERING_TIPS.map(({ icon: Icon, title, body }, i) => (
                 <div key={title} className="panel p-7 flex flex-col gap-5">
@@ -599,14 +829,12 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-
-            {/* Pro tip callout */}
             <div className="mt-8 rounded-2xl p-8 grid md:grid-cols-2 gap-10 items-center" style={{ background: R_BG, border: `1px solid ${R_BORDER}` }}>
               <div>
                 <p className="eyebrow mb-3">Pro Tip</p>
                 <h3 className="text-2xl font-normal serif mb-4">The skin chemistry variable.</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Every person&apos;s skin pH, diet, and moisture level changes how a fragrance opens and evolves. Always test a new stack on your own skin before committing to it — what works on someone else may open differently on you.
+                  Every person&apos;s skin pH, diet, and moisture level changes how a fragrance opens and evolves. Always test a new stack on your own skin before committing to it.
                 </p>
               </div>
               <div className="space-y-4">
@@ -640,7 +868,7 @@ export default function HomePage() {
                 <em className="italic" style={{ color: R }}>unforgettable scent.</em>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4 text-[15px]">
-                The scents that linger in memory are layered — a centuries-old technique now powered by data. The key is knowing which notes complement each other vs. clash.
+                The scents that linger in memory are layered — a centuries-old technique now powered by data.
               </p>
               <p className="text-muted-foreground leading-relaxed text-[15px]">
                 Your Scents runs this analysis across your entire collection — every possible combination, instantly surfaced and ranked.
@@ -648,9 +876,9 @@ export default function HomePage() {
             </div>
             <div className="space-y-4">
               {[
-                { icon: Wind,     color: 'hsl(190 45% 58%)', term: 'Top Notes',   timing: '0–30 min',    body: 'The opening impression — citrus, herbs, light florals. They fade fast but define your first impression entirely. In layering, they ride on top of the stack.' },
-                { icon: Sparkles, color: R,                   term: 'Heart Notes', timing: '30 min–3 hr', body: 'The main character. Florals, spices, soft rose. This is what people smell on you hours into the day — and what makes a fragrance signature.' },
-                { icon: Flame,    color: 'hsl(13 55% 62%)',   term: 'Base Notes',  timing: '3 hr+',       body: 'Your lasting signature — musks, woods, vanilla, amber. These anchor the stack, fuse with skin, and are the foundation of every iconic layering combo.' },
+                { icon: Wind,     color: 'hsl(190 45% 58%)', term: 'Top Notes',   timing: '0–30 min',    body: 'The opening impression — citrus, herbs, light florals. They fade fast but define your first impression entirely.' },
+                { icon: Sparkles, color: R,                   term: 'Heart Notes', timing: '30 min–3 hr', body: 'The main character. Florals, spices, soft rose. This is what people smell on you hours into the day.' },
+                { icon: Flame,    color: 'hsl(13 55% 62%)',   term: 'Base Notes',  timing: '3 hr+',       body: 'Your lasting signature — musks, woods, vanilla, amber. These anchor the stack and fuse with skin.' },
               ].map(({ icon: Icon, color, term, timing, body }) => (
                 <div key={term} className="panel p-5 flex gap-4">
                   <div className="mt-0.5 shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color.slice(0,-1)} / 0.10)` }}>
@@ -704,10 +932,9 @@ export default function HomePage() {
 
         <div className="max-w-4xl mx-auto px-6"><div className="rule opacity-50" /></div>
 
-        {/* ── WHY I BUILT THIS — moved here, center of page, between How It Works and Pricing ── */}
+        {/* ── WHY I BUILT THIS ── */}
         <section className="py-28 px-6">
           <div className="max-w-2xl mx-auto text-center">
-            {/* Icon */}
             <div className="flex justify-center mb-6">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -716,37 +943,18 @@ export default function HomePage() {
                 <Heart size={26} strokeWidth={1.5} style={{ color: R }} fill={R} />
               </div>
             </div>
-
             <p className="eyebrow mb-3">Why I Built This</p>
-            <h2 className="text-3xl md:text-4xl font-normal serif mb-10" style={{ color: R_DEEP }}>
-              Built with love.
-            </h2>
-
-            {/* Card */}
+            <h2 className="text-3xl md:text-4xl font-normal serif mb-10" style={{ color: R_DEEP }}>Built with love.</h2>
             <div
               className="rounded-3xl px-10 py-10 text-left space-y-6 relative overflow-hidden"
-              style={{
-                background: 'hsl(0 0% 100%)',
-                border: `1px solid ${R_BORDER}`,
-                boxShadow: `0 20px 60px hsl(8 56% 76% / 0.15), 0 2px 8px hsl(8 56% 76% / 0.08)`,
-              }}
+              style={{ background: 'hsl(0 0% 100%)', border: `1px solid ${R_BORDER}`, boxShadow: `0 20px 60px hsl(8 56% 76% / 0.15), 0 2px 8px hsl(8 56% 76% / 0.08)` }}
             >
-              {/* Decorative rose tint top strip */}
-              <div
-                className="absolute inset-x-0 top-0 h-1 rounded-t-3xl"
-                style={{ background: `linear-gradient(90deg, transparent, ${R}, transparent)` }}
-              />
-
+              <div className="absolute inset-x-0 top-0 h-1 rounded-t-3xl" style={{ background: `linear-gradient(90deg, transparent, ${R}, transparent)` }} />
               <p className="text-[16px] leading-[1.85] text-foreground font-normal">
                 I built this in honor of the most amazing girl in the entire world. She is brilliant, caring, loving, thoughtful — I could go on forever, but in short I love this girl.
               </p>
-
-              {/* Divider */}
               <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${R_BORDER}, transparent)` }} />
-
-              <p className="text-[16px] leading-[1.85] text-foreground italic serif">
-                P.S. I love you to the moon and back 🌙
-              </p>
+              <p className="text-[16px] leading-[1.85] text-foreground italic serif">P.S. I love you to the moon and back 🌙</p>
             </div>
           </div>
         </section>
@@ -821,11 +1029,11 @@ export default function HomePage() {
             </div>
             <div className="space-y-2">
               {[
-                { q: 'Do I have to own these perfumes already?', a: 'Yes — Your Scents is built around the collection you already own. You add your bottles, and we do everything else. You can also wishlist fragrances and get layering suggestions that include them.' },
-                { q: 'How does it know what notes are in my perfumes?', a: 'We use a database of over 70,000 fragrances with verified top, heart, and base note data. When you add a bottle, we automatically pull its full note profile — no manual entry required.' },
-                { q: 'How are stack compatibility scores calculated?', a: 'Compatibility scores are based on note family harmony, shared molecular families (e.g. both containing Ambroxan), longevity matching, and seasonal/occasion alignment. Scores above 85% are considered excellent pairings.' },
-                { q: 'What is a scent card?', a: 'A shareable page showing your fragrance wardrobe, signature notes, and favourite stacks — with its own URL. Post it on TikTok, put it in your bio, or send it when someone asks what you wear.' },
-                { q: 'Can I use this if I only own a few perfumes?', a: 'Absolutely. The free plan supports up to 3 fragrances, which is plenty to start getting layering suggestions and occasion recommendations.' },
+                { q: 'Do I have to own these perfumes already?', a: 'Yes — Your Scents is built around the collection you already own. You add your bottles, and we do everything else.' },
+                { q: 'How does it know what notes are in my perfumes?', a: 'We use a database of over 70,000 fragrances with verified top, heart, and base note data. When you add a bottle, we automatically pull its full note profile.' },
+                { q: 'How are stack compatibility scores calculated?', a: 'Compatibility scores are based on note family harmony, shared molecular families, longevity matching, and seasonal/occasion alignment. Scores above 85% are considered excellent pairings.' },
+                { q: 'What is a scent card?', a: 'A shareable page showing your fragrance wardrobe, signature notes, and favourite stacks — with its own URL.' },
+                { q: 'Can I use this if I only own a few perfumes?', a: 'Absolutely. The free plan supports up to 3 fragrances, which is plenty to start getting layering suggestions.' },
                 { q: 'Is there a mobile app?', a: 'Your Scents is a fully responsive web app that works perfectly on any phone — no download needed. A native app is on the roadmap.' },
                 { q: 'Can I cancel my subscription anytime?', a: 'Yes, any time, no questions asked. Your collection data stays yours and will still be accessible on the free plan after you cancel.' },
               ].map(({ q, a }) => <FAQItem key={q} q={q} a={a} />)}
@@ -875,7 +1083,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
             <div>
-              <img src={LOGO_URL} alt="Your Scents Logo" className="h-10 w-auto object-contain mb-2" />
+              <Image src="/logo.png" alt="Your Scents Logo" width={120} height={40} className="h-10 w-auto object-contain mb-2" />
               <p className="text-xs text-muted-foreground">The intelligent fragrance wardrobe.</p>
             </div>
             <div className="flex gap-6 text-xs text-muted-foreground">
