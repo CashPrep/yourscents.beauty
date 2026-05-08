@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp, Dna, Share2, Zap } from 'lucide-react'
+import { Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp, Dna, Share2, Zap, Brain, CloudSun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -11,10 +11,13 @@ import ScentDNA from './ScentDNA'
 import ScentOfTheDay from './ScentOfTheDay'
 import DiscoveryFeed from './DiscoveryFeed'
 import StackSuggestions from './StackSuggestions'
+import MoodMatcher from './MoodMatcher'
+import SeasonalRotation from './SeasonalRotation'
 import Link from 'next/link'
 
 const GOLD = 'hsl(42 85% 68%)'
 const GOLD_BG = 'hsl(42 85% 68% / 0.10)'
+const LOGO_URL = 'https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/67238f7d-e958-42c4-9876-33b89144adfd.png'
 
 interface Props {
   user: any
@@ -22,7 +25,7 @@ interface Props {
   profile: any
 }
 
-type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna'
+type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna' | 'mood' | 'seasonal'
 
 const SORT_OPTIONS = [
   { value: 'recent', label: 'Recently Added' },
@@ -79,10 +82,12 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
       return 0
     })
 
-  const tabs: { id: Tab; label: string; icon: any; badge?: number }[] = [
+  const tabs: { id: Tab; label: string; icon: any; badge?: number; isNew?: boolean }[] = [
     { id: 'wardrobe',  label: 'Wardrobe',  icon: Star,       badge: wardrobe.length },
     { id: 'stacks',    label: 'Stacks',    icon: Layers },
     { id: 'occasions', label: 'Occasions', icon: Calendar },
+    { id: 'mood',      label: 'Mood',      icon: Brain,      isNew: true },
+    { id: 'seasonal',  label: 'Seasonal',  icon: CloudSun,   isNew: true },
     { id: 'discover',  label: 'Discover',  icon: TrendingUp },
     { id: 'dna',       label: 'Scent DNA', icon: Dna },
   ]
@@ -98,9 +103,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
       <header className="border-b border-border sticky top-0 z-40" style={{ background: 'hsl(220 16% 8% / 0.90)', backdropFilter: 'blur(16px)' }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GOLD }}>
-              <span className="text-[hsl(220_18%_6%)] text-xs font-bold">S</span>
-            </div>
+            <img src={LOGO_URL} alt="ScentStack" className="w-7 h-7 rounded-lg object-cover" />
             <span className="font-semibold text-sm tracking-tight">ScentStack</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ml-1 ${
               plan === 'collector' ? 'bg-amber-900/40 text-amber-400 border border-amber-700/40' :
@@ -137,9 +140,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: 'Bottles', value: wardrobe.length, icon: Star },
-            { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—', icon: Sparkles },
-            { label: 'Plan', value: plan.charAt(0).toUpperCase() + plan.slice(1), icon: Zap },
+            { label: 'Bottles',    value: wardrobe.length,                                              icon: Star },
+            { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—',                          icon: Sparkles },
+            { label: 'Plan',       value: plan.charAt(0).toUpperCase() + plan.slice(1),                  icon: Zap },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-xl p-4 border border-border" style={{ background: 'hsl(220 16% 8%)' }}>
               <div className="flex items-center gap-2 mb-1">
@@ -153,11 +156,11 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
-          {tabs.map(({ id, label, icon: Icon, badge }) => (
+          {tabs.map(({ id, label, icon: Icon, badge, isNew }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium whitespace-nowrap transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium whitespace-nowrap transition-all relative"
               style={
                 activeTab === id
                   ? { background: GOLD_BG, color: GOLD, border: `1px solid hsl(42 85% 68% / 0.25)` }
@@ -169,6 +172,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               {badge !== undefined && badge > 0 && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: GOLD_BG, color: GOLD }}>{badge}</span>
               )}
+              {isNew && (
+                <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: GOLD, color: 'hsl(220 18% 6%)' }}>NEW</span>
+              )}
             </button>
           ))}
         </div>
@@ -176,7 +182,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         {/* Tab: Wardrobe */}
         {activeTab === 'wardrobe' && (
           <div>
-            {/* Controls */}
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <div className="flex gap-2 flex-wrap">
                 {ACCORD_FILTERS.map(f => (
@@ -215,7 +220,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               </div>
             </div>
 
-            {/* Empty state */}
             {displayWardrobe.length === 0 && (
               <div className="text-center py-20 border border-dashed border-border rounded-2xl">
                 <Sparkles className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
@@ -231,7 +235,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               </div>
             )}
 
-            {/* Grid */}
             {displayWardrobe.length > 0 && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {displayWardrobe.map((item: any) => (
@@ -247,29 +250,15 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           </div>
         )}
 
-        {/* Tab: Stacks */}
-        {activeTab === 'stacks' && (
-          <StackSuggestions wardrobe={wardrobe} />
-        )}
-
-        {/* Tab: Occasions */}
-        {activeTab === 'occasions' && (
-          <OccasionPlanner wardrobe={wardrobe} />
-        )}
-
-        {/* Tab: Discover */}
-        {activeTab === 'discover' && (
-          <DiscoveryFeed wardrobe={wardrobe} />
-        )}
-
-        {/* Tab: Scent DNA */}
-        {activeTab === 'dna' && (
-          <ScentDNA wardrobe={wardrobe} />
-        )}
+        {activeTab === 'stacks'    && <StackSuggestions wardrobe={wardrobe} />}
+        {activeTab === 'occasions' && <OccasionPlanner wardrobe={wardrobe} />}
+        {activeTab === 'mood'      && <MoodMatcher wardrobe={wardrobe} />}
+        {activeTab === 'seasonal'  && <SeasonalRotation wardrobe={wardrobe} />}
+        {activeTab === 'discover'  && <DiscoveryFeed wardrobe={wardrobe} />}
+        {activeTab === 'dna'       && <ScentDNA wardrobe={wardrobe} />}
 
       </div>
 
-      {/* Add Modal */}
       {showAddModal && (
         <AddFragranceModal
           onClose={() => setShowAddModal(false)}
