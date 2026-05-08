@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Sparkles } from 'lucide-react'
 
 function SignupForm() {
   const router = useRouter()
@@ -26,12 +25,17 @@ function SignupForm() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name, plan } },
+      options: {
+        data: { full_name: name, plan },
+        // Skip email confirmation — go straight to app
+        emailRedirectTo: undefined,
+      },
     })
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
+      // Always go to dashboard immediately — no email verification step
       if (plan !== 'free') {
         router.push(`/api/checkout?plan=${plan}`)
       } else {
@@ -41,37 +45,55 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
-      <div className="bg-white rounded-2xl shadow-sm border p-8 w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">ScentStack</span>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      {/* Background accents */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[hsl(34_55%_90%/0.4)] blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[hsl(36_40%_88%/0.35)] blur-3xl" />
+      </div>
+
+      <div className="relative bg-card border border-border rounded-2xl shadow-lg p-8 w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="w-8 h-8 rounded-full bg-[hsl(34_55%_48%)] flex items-center justify-center">
+            <span className="text-white text-sm font-bold">S</span>
+          </div>
+          <span className="text-lg font-medium serif">Your Scents</span>
         </div>
-        <h1 className="text-2xl font-bold mb-2">Create your account</h1>
-        <p className="text-muted-foreground text-sm mb-6">
-          {plan !== 'free' ? `Getting started with ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan` : 'Start for free — no credit card needed'}
+
+        <h1 className="text-2xl font-light serif mb-1.5">Create your account</h1>
+        <p className="text-muted-foreground text-sm mb-7">
+          {plan !== 'free'
+            ? `Getting started with the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan`
+            : 'Start free — no credit card needed'}
         </p>
+
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" value={name} onChange={e => setName(e.target.value)} required />
+            <Label htmlFor="name" className="text-xs font-medium">Full Name</Label>
+            <Input id="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <Label htmlFor="email" className="text-xs font-medium">Email</Label>
+            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required />
+            <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+            <Input id="password" type="password" placeholder="Min. 8 characters" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required className="rounded-xl" />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full rounded-full font-semibold text-sm bg-[hsl(34_55%_48%)] hover:bg-[hsl(34_55%_42%)]"
+            disabled={loading}
+          >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>
-        <p className="text-center text-sm text-muted-foreground mt-6">
+
+        <p className="text-center text-xs text-muted-foreground mt-6">
           Already have an account?{' '}
-          <Link href="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+          <Link href="/login" className="text-[hsl(34_55%_44%)] font-medium hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
