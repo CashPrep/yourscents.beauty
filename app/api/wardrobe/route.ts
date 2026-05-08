@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
   if (profile?.plan === 'free') {
     const { count } = await supabase.from('wardrobe_items').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    if ((count || 0) >= 10) {
-      return NextResponse.json({ error: 'Free plan limit reached. Upgrade to Pro.' }, { status: 403 })
+    if ((count || 0) >= 5) {
+      return NextResponse.json({ error: 'Free plan is limited to 5 fragrances. Upgrade to Pro for unlimited.' }, { status: 403 })
     }
   }
   const { data, error } = await supabase.from('wardrobe_items').insert({
