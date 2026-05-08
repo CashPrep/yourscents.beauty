@@ -9,7 +9,7 @@ export default function HomePage() {
       <nav className="flex items-center justify-between px-6 py-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">ScentStack</span>
+          <span className="text-xl font-bold text-primary">Your Scents</span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login">
@@ -32,7 +32,7 @@ export default function HomePage() {
           <span className="text-primary">Elevate every occasion.</span>
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          ScentStack analyzes the real notes in your fragrances and tells you the best occasions, the best combinations, and even creates custom stacks for any event — using only what you already own.
+          Your Scents analyzes the real notes in your fragrances and tells you the best occasions, the best combinations, and even creates custom stacks for any event — using only what you already own.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/signup">
@@ -51,7 +51,7 @@ export default function HomePage() {
           {[
             { icon: Search, title: 'Find Any Fragrance', desc: 'Search from 70,000+ real perfumes and colognes. Add them to your personal wardrobe.' },
             { icon: Layers, title: 'Stack & Layer', desc: 'Discover combinations from your own collection that create entirely new scent profiles.' },
-            { icon: Calendar, title: 'Occasion Planner', desc: 'Choose an occasion and ScentStack builds the perfect stack from what you own.' },
+            { icon: Calendar, title: 'Occasion Planner', desc: 'Choose an occasion and Your Scents builds the perfect stack from what you own.' },
             { icon: Star, title: 'Real Note Data', desc: 'Every suggestion is backed by real top, middle, and base notes — nothing is made up.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-white rounded-2xl p-6 shadow-sm border">
@@ -131,9 +131,9 @@ export default function HomePage() {
       <footer className="border-t bg-white mt-20 py-10 text-center text-sm text-muted-foreground">
         <div className="flex items-center justify-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="font-semibold text-foreground">ScentStack</span>
+          <span className="font-semibold text-foreground">Your Scents</span>
         </div>
-        <p>© {new Date().getFullYear()} ScentStack. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Your Scents. All rights reserved.</p>
         <div className="flex justify-center gap-6 mt-3">
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
