@@ -16,6 +16,8 @@ const G_DIM = 'hsl(42 55% 45%)'
 const G_BG = 'hsl(42 85% 68% / 0.10)'
 const G_BORDER = 'hsl(42 85% 68% / 0.25)'
 
+const LOGO_URL = 'https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/67238f7d-e958-42c4-9876-33b89144adfd.png'
+
 const PHOTOS = {
   hero:     'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=900&q=90&fit=crop',
   feature1: 'https://images.unsplash.com/photo-1617897903246-719242758050?w=900&q=85&fit=crop',
@@ -560,9 +562,11 @@ export default function HomePage() {
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: G }}>
-              <span className="text-[hsl(220_18%_6%)] text-xs font-bold">S</span>
-            </div>
+            <img
+              src={LOGO_URL}
+              alt="ScentStack Logo"
+              className="h-9 w-9 rounded-lg object-cover shrink-0"
+            />
             <span className="text-base font-semibold tracking-tight">ScentStack</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -1069,9 +1073,11 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
             <div>
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: G }}>
-                  <span className="text-[hsl(220_18%_6%)] text-[10px] font-bold">S</span>
-                </div>
+                <img
+                  src={LOGO_URL}
+                  alt="ScentStack Logo"
+                  className="h-6 w-6 rounded-md object-cover"
+                />
                 <p className="text-sm font-semibold">ScentStack</p>
               </div>
               <p className="text-xs text-muted-foreground">The intelligent fragrance wardrobe.</p>
