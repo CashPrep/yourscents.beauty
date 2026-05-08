@@ -3,21 +3,22 @@ import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
-  title: 'Your Scents — Build Your Fragrance Wardrobe',
+  title: 'Your Scents ✨ — Your Personal Fragrance Wardrobe',
   description:
-    'Catalog your fragrance collection, discover optimal wear occasions for each scent, and find the best layering combinations using real note data from 70,000+ perfumes and colognes.',
+    'Discover, collect, and layer fragrances you actually love. Your Scents matches you with the perfect scent for any vibe — from coffee dates to girls\' nights out.',
   keywords: [
     'fragrance wardrobe',
-    'perfume collection tracker',
+    'perfume collection',
     'scent layering',
     'cologne app',
     'fragrance notes',
-    'perfume combinations',
+    'perfume combos',
+    'aesthetic perfume app',
   ],
   openGraph: {
-    title: 'Your Scents — Layer Your Fragrances Like a Pro',
+    title: 'Your Scents ✨ — Find Your Signature Scent',
     description:
-      'Discover the best occasions and layering combos for every fragrance you own. Backed by real top, middle, and base note data.',
+      'Build your dream fragrance wardrobe and get AI-powered layering combos. Made for fragrance lovers.',
     type: 'website',
   },
 }

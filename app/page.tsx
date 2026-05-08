@@ -7,35 +7,35 @@ import {
   FlaskConical,
   ArrowRight,
   Check,
-  BookOpen,
-  Wind,
-  Droplets,
+  Sparkles,
+  Heart,
+  Star,
 } from 'lucide-react'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
 
-      {/* ─── Navigation ─── */}
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
+      {/* ─── Nav ─── */}
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="text-[10px] editorial-cap text-muted-foreground tracking-widest">✦</span>
-            <span className="text-lg font-medium tracking-tight" style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 500 }}>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl" aria-hidden>🌸</span>
+            <span className="text-lg font-semibold tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
               Your Scents
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <Link href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
-            <Link href="#the-craft" className="hover:text-foreground transition-colors">The Craft</Link>
+            <Link href="#vibes" className="hover:text-foreground transition-colors">Find Your Vibe</Link>
             <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Log in
             </Link>
-            <Button asChild size="sm" className="rounded-sm px-5 text-xs tracking-wide font-medium">
-              <Link href="/signup">Get Started</Link>
+            <Button asChild size="sm" className="rounded-full px-5 text-xs font-semibold">
+              <Link href="/signup">Get Started 🎀</Link>
             </Button>
           </div>
         </div>
@@ -44,93 +44,206 @@ export default function HomePage() {
       <main>
 
         {/* ─── Hero ─── */}
-        <section className="pt-40 pb-32 px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="editorial-cap text-muted-foreground mb-8 tracking-widest">
-              70,000+ Fragrances · Real Note Data · Built for Collectors
-            </p>
-            <h1 className="text-5xl md:text-7xl leading-[1.08] font-light text-balance mb-8"
-              style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 300 }}>
+        <section className="pt-40 pb-28 px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="pill mb-6 mx-auto w-fit">✨ 70,000+ fragrances · real note data</div>
+            <h1
+              className="text-5xl md:text-6xl leading-[1.12] font-bold text-balance mb-6"
+              style={{ fontFamily: 'Playfair Display, serif' }}
+            >
               Your fragrance wardrobe,{' '}
-              <em className="italic font-light" style={{ color: 'hsl(340 28% 42%)' }}>intelligently</em>{' '}
-              organized.
+              <em className="italic" style={{ color: 'hsl(340 60% 58%)' }}>finally organized</em> 🌹
             </h1>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed mb-12">
-              Your Scents analyzes the actual top, heart, and base notes of every fragrance you own —
-              then tells you when to wear them, how to layer them, and what occasions they were made for.
+            <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed mb-10">
+              Stop guessing which perfume to wear. Your Scents learns your collection and tells you the
+              <span className="font-medium text-foreground"> perfect scent</span> for every vibe — coffee run, date night,
+              girls' trip, whatever.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="rounded-sm px-8 text-sm tracking-wide">
-                <Link href="/signup">Start Your Collection</Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button asChild size="lg" className="rounded-full px-8 text-sm font-semibold">
+                <Link href="/signup">Start for free 💗</Link>
               </Button>
               <Link
                 href="#how-it-works"
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
               >
                 See how it works
                 <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
+            {/* Social proof */}
+            <p className="mt-8 text-xs text-muted-foreground">
+              💬 &ldquo;Finally an app that gets my fragrance obsession&rdquo; — loved by collectors everywhere
+            </p>
           </div>
         </section>
 
-        {/* ─── Divider ─── */}
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="gold-line opacity-60" />
-        </div>
+        {/* ─── Petal divider ─── */}
+        <div className="max-w-4xl mx-auto px-6"><div className="petal-line opacity-70" /></div>
 
-        {/* ─── Editorial Intro (The Craft of Fragrance Layering) ─── */}
-        <section id="the-craft" className="py-28 px-6">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-start">
-            <div>
-              <p className="editorial-cap text-muted-foreground mb-5">The Craft</p>
-              <h2 className="text-4xl md:text-5xl font-light leading-tight mb-7"
-                style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                Fragrance layering is an ancient art.
-                <em className="italic"> Most people do it wrong.</em>
+        {/* ─── Vibes section ─── */}
+        <section id="vibes" className="py-24 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="label-tag text-primary mb-3">Find Your Vibe ✨</p>
+              <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Every occasion deserves
+                <em className="italic"> the right scent.</em>
               </h2>
-              <div className="prose prose-sm text-muted-foreground leading-loose space-y-4 max-w-none">
-                <p>
-                  The practice of layering — wearing two or more fragrances simultaneously — dates to ancient
-                  Mesopotamia, where oils of myrrh, cedar, and labdanum were combined to tell a story on the skin.
-                  Arabian perfumery codified the technique into <em>bakhoor</em> and <em>attar</em> blending,
-                  traditions that still inform modern niche houses like Amouage and Zoologist.
-                </p>
-                <p>
-                  The error most modern wearers make is treating layering as random experimentation. In reality,
-                  it follows the same principles as music harmony: like notes amplify, unlike notes contrast, and
-                  the ratio of top-to-base determines what your skin reads first, last, and longest.
-                </p>
-                <p>
-                  Your Scents applies this logic algorithmically — cross-referencing the full note pyramids of your
-                  owned fragrances against thousands of documented accords to surface combinations that actually work.
-                </p>
-              </div>
+              <p className="mt-3 text-muted-foreground text-sm max-w-md mx-auto">
+                We match you to your collection based on the actual notes in your bottles — not just vibes (well, also vibes).
+              </p>
             </div>
-            <div className="space-y-6 pt-2">
+            <div className="grid md:grid-cols-3 gap-5">
               {[
                 {
-                  icon: Wind,
-                  term: 'Top Notes',
-                  body: 'The first impression — citrus, aromatic herbs, light aldehydes. They evaporate within 15–30 minutes and set the opening mood. When layering, match or contrast tops deliberately; clashing tops create olfactory confusion.',
+                  emoji: '☕',
+                  occasion: 'Coffee Date',
+                  desc: 'Warm, cozy, and just a little sweet. Think vanilla, sandalwood, and soft musks that feel like a hug.',
+                  tag: 'casual & cute',
                 },
                 {
-                  icon: Droplets,
-                  term: 'Heart Notes',
-                  body: 'The soul of the fragrance. Florals, spices, and resins live here. The heart blooms as the top fades and dominates for 1–4 hours. Complementary hearts — say, rose and oud — are the foundation of classic Oriental layering.',
+                  emoji: '🌙',
+                  occasion: 'Date Night',
+                  desc: 'Mysterious and magnetic. Rich florals, soft oud, and base notes that linger on your skin all night.',
+                  tag: 'sultry & romantic',
                 },
                 {
-                  icon: BookOpen,
-                  term: 'Base Notes',
-                  body: 'The signature left on fabric and skin. Musks, ambers, woods, and animalics anchor the composition for 6–24+ hours. When two fragrances share base families, they fuse rather than compete — making them ideal layering candidates.',
+                  emoji: '🌸',
+                  occasion: 'Spring Brunch',
+                  desc: 'Bright, clean, and effortless. Fresh florals and citrus that feel like sunshine in a bottle.',
+                  tag: 'fresh & floral',
+                },
+                {
+                  emoji: '📚',
+                  occasion: 'Study Session',
+                  desc: 'Clean, focused energy. Light woods, iris, and crisp whites that keep you feeling put-together.',
+                  tag: 'clean & minimal',
+                },
+                {
+                  emoji: '✈️',
+                  occasion: 'Girls\' Trip',
+                  desc: 'Adventurous and carefree. Aquatics, tropical florals, and breezy accords for wherever you\'re going.',
+                  tag: 'fun & free',
+                },
+                {
+                  emoji: '🎉',
+                  occasion: 'Girls\' Night Out',
+                  desc: 'Bold and unforgettable. Sexy musks, dark roses, and deep ambers that make everyone ask "what are you wearing?"',
+                  tag: 'bold & sexy',
+                },
+              ].map(({ emoji, occasion, desc, tag }) => (
+                <div key={occasion} className="card-soft flex flex-col gap-3 hover:shadow-md transition-shadow">
+                  <div className="text-3xl">{emoji}</div>
+                  <div className="pill w-fit">{tag}</div>
+                  <h3 className="text-lg font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>{occasion}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Petal divider ─── */}
+        <div className="max-w-4xl mx-auto px-6"><div className="petal-line opacity-70" /></div>
+
+        {/* ─── How It Works ─── */}
+        <section id="how-it-works" className="py-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="label-tag text-primary mb-3">How It Works</p>
+              <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                From bottle to bestie in 4 steps 🎀
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-4 gap-5">
+              {[
+                {
+                  step: '01',
+                  icon: Search,
+                  emoji: '🔍',
+                  title: 'Add Your Bottles',
+                  body: 'Search 70,000+ fragrances and add your collection in seconds. Bottles, decants, samples — all of it.',
+                },
+                {
+                  step: '02',
+                  icon: FlaskConical,
+                  emoji: '🧪',
+                  title: 'We Decode the Notes',
+                  body: 'We map every top, heart, and base note in your collection using verified data — automatically.',
+                },
+                {
+                  step: '03',
+                  icon: Layers,
+                  emoji: '💡',
+                  title: 'Get Layer Ideas',
+                  body: 'See which of your perfumes pair perfectly together to create something totally unique to you.',
+                },
+                {
+                  step: '04',
+                  icon: CalendarDays,
+                  emoji: '📅',
+                  title: 'Pick By Occasion',
+                  body: 'Tell us where you\'re going and we\'ll pull the perfect scent (or stack) from what you already own.',
+                },
+              ].map(({ step, emoji, title, body }) => (
+                <div key={step} className="card-soft flex flex-col gap-3">
+                  <span className="text-2xl">{emoji}</span>
+                  <p className="label-tag text-primary">{step}</p>
+                  <h3 className="font-semibold text-base" style={{ fontFamily: 'Playfair Display, serif' }}>{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Petal divider ─── */}
+        <div className="max-w-4xl mx-auto px-6"><div className="petal-line opacity-70" /></div>
+
+        {/* ─── Layering 101 ─── */}
+        <section className="py-24 px-6">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <p className="label-tag text-primary mb-4">Layering 101 🌸</p>
+              <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-5" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Layering fragrances is literally
+                <em className="italic"> an art form.</em>
+              </h2>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                The most iconic scents you smell on people? Often two or three layered together. Fragrance houses have been doing it for centuries — Arabian perfumers, French maisons, niche indie brands.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                The trick is knowing which notes complement each other vs. clash. Your Scents does the hard work — you just spray and go ✨
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Over 68% of Gen Z shoppers connect more with brands that feel warm and personal. We built this for you — the collector, the curious, the one who types fragrance names into TikTok search.
+              </p>
+            </div>
+            <div className="space-y-4">
+              {[
+                {
+                  icon: Sparkles,
+                  term: 'Top Notes ✨',
+                  body: 'The first spritz — citrus, herbs, light florals. They last ~30 min and set your opening vibe. Think of them as the intro to your scent story.',
+                },
+                {
+                  icon: Heart,
+                  term: 'Heart Notes 💗',
+                  body: 'The main character. Florals, spices, and soft roses live here. This is what people smell on you for hours.',
+                },
+                {
+                  icon: Star,
+                  term: 'Base Notes 🌙',
+                  body: 'The lingering signature — musks, woods, vanilla, amber. What stays on your skin and clothes. Matching base notes = perfect layering.',
                 },
               ].map(({ icon: Icon, term, body }) => (
-                <div key={term} className="flex gap-5 p-5 border border-border rounded-sm bg-card">
-                  <div className="mt-1 shrink-0">
-                    <Icon size={18} className="text-muted-foreground" strokeWidth={1.5} />
+                <div key={term} className="card-soft flex gap-4">
+                  <div className="mt-0.5 shrink-0">
+                    <Icon size={18} className="text-primary" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium mb-1.5" style={{ fontFamily: 'DM Sans, sans-serif' }}>{term}</h3>
+                    <h3 className="text-sm font-semibold mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>{term}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
                   </div>
                 </div>
@@ -139,113 +252,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Divider ─── */}
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="gold-line opacity-60" />
-        </div>
-
-        {/* ─── How It Works ─── */}
-        <section id="how-it-works" className="py-28 px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 max-w-lg">
-              <p className="editorial-cap text-muted-foreground mb-4">How It Works</p>
-              <h2 className="text-4xl font-light leading-snug" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                From bottle to intelligence in four steps.
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-4 gap-px bg-border">
-              {[
-                {
-                  step: '01',
-                  icon: Search,
-                  title: 'Build Your Wardrobe',
-                  body: 'Search from 70,000+ catalogued fragrances by house, family, or note. Add each bottle, decant, or sample you own.',
-                },
-                {
-                  step: '02',
-                  icon: FlaskConical,
-                  title: 'Note Analysis',
-                  body: 'We map the full pyramidal structure of each fragrance — top, heart, and base — using verified community and house data.',
-                },
-                {
-                  step: '03',
-                  icon: Layers,
-                  title: 'Stack Recommendations',
-                  body: 'Our algorithm identifies which pairs and trios from your collection share harmonious accords and complementary drydowns.',
-                },
-                {
-                  step: '04',
-                  icon: CalendarDays,
-                  title: 'Occasion Matching',
-                  body: 'Tell us the occasion — office, date night, black tie, outdoor summer — and we pull the ideal stack from what you already own.',
-                },
-              ].map(({ step, icon: Icon, title, body }) => (
-                <div key={step} className="bg-card p-8">
-                  <div className="flex items-start justify-between mb-6">
-                    <span className="text-xs text-muted-foreground editorial-cap">{step}</span>
-                    <Icon size={16} className="text-muted-foreground" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-lg font-light mb-3" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem' }}>
-                    {title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Occasion Guide (Educational) ─── */}
-        <section className="py-28 px-6 bg-card border-y border-border">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-14 max-w-lg">
-              <p className="editorial-cap text-muted-foreground mb-4">Occasion Intelligence</p>
-              <h2 className="text-4xl font-light leading-snug" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                Not every fragrance belongs in every room.
-              </h2>
-              <p className="mt-4 text-muted-foreground text-sm leading-relaxed max-w-md">
-                The relationship between fragrance and environment is governed by physics as much as aesthetics.
-                Temperature, humidity, and social proximity all affect diffusion, projection, and longevity.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  occasion: 'Office & Professional',
-                  guidance: 'In close quarters, projection becomes intrusion. Lean toward low-sillage musks, clean woods (sandalwood, cedar), and soft ambers. Avoid heavy ouds, indolic florals, or anything reminiscent of nightlife.',
-                  notes: 'Ideal notes: clean musks, vetiver, iris, light cedar, sheer florals',
-                },
-                {
-                  occasion: 'Evening & Formal',
-                  guidance: "Cooler evening air slows evaporation — ideal for heavy musks, labdanum, and animalic bases that would overpower in daylight. This is where a fragrance's base notes become its strength.",
-                  notes: 'Ideal notes: oud, amber, patchouli, vanilla, dark florals, resins',
-                },
-                {
-                  occasion: 'Outdoor & Warm Weather',
-                  guidance: 'Heat accelerates evaporation drastically — what projects beautifully at 65°F will become overwhelming at 85°F. Opt for aquatics, citrus, and green notes that breathe rather than suffocate.',
-                  notes: 'Ideal notes: neroli, petitgrain, marine accords, grass, light woods',
-                },
-              ].map(({ occasion, guidance, notes }) => (
-                <div key={occasion} className="border border-border p-7 rounded-sm">
-                  <h3 className="text-base font-medium mb-4" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.15rem', fontWeight: 500 }}>
-                    {occasion}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{guidance}</p>
-                  <p className="text-xs text-muted-foreground/70 italic">{notes}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ─── Petal divider ─── */}
+        <div className="max-w-4xl mx-auto px-6"><div className="petal-line opacity-70" /></div>
 
         {/* ─── Pricing ─── */}
-        <section id="pricing" className="py-28 px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-14 max-w-sm">
-              <p className="editorial-cap text-muted-foreground mb-4">Pricing</p>
-              <h2 className="text-4xl font-light" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                Simple tiers. No fine print.
+        <section id="pricing" className="py-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="label-tag text-primary mb-3">Pricing 💸</p>
+              <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Pick your plan, girlie 🎀
               </h2>
+              <p className="mt-3 text-muted-foreground text-sm">No weird fees. Cancel anytime. Start free.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {[
@@ -253,38 +271,38 @@ export default function HomePage() {
                   name: 'Free',
                   price: '$0',
                   period: 'forever',
-                  description: 'For casual collectors starting out.',
+                  description: 'For the casual collector 🌸',
                   features: [
-                    'Up to 10 fragrances in wardrobe',
-                    '3 stack suggestions per day',
+                    'Up to 10 fragrances',
+                    '3 layering combos/day',
                     'Basic occasion matching',
-                    'Full 70,000+ fragrance search',
+                    '70,000+ fragrance search',
                   ],
-                  cta: 'Get Started Free',
+                  cta: 'Start for Free',
                   href: '/signup',
                   highlighted: false,
                 },
                 {
-                  name: 'Pro',
+                  name: 'Pro ✨',
                   price: '$7.99',
-                  period: '/month',
-                  description: 'For enthusiasts who wear intentionally.',
+                  period: '/mo',
+                  description: 'For the serious collector 💗',
                   features: [
-                    'Unlimited wardrobe size',
-                    'Unlimited stack recommendations',
+                    'Unlimited fragrance wardrobe',
+                    'Unlimited layering combos',
                     'Full occasion planner',
                     'Note compatibility scores',
                     'Shareable scent cards',
                   ],
-                  cta: 'Start Pro',
+                  cta: 'Go Pro 💗',
                   href: '/signup?plan=pro',
                   highlighted: true,
                 },
                 {
-                  name: 'Collector',
+                  name: 'Collector 🌹',
                   price: '$14.99',
-                  period: '/month',
-                  description: 'For serious collectors and hobbyists.',
+                  period: '/mo',
+                  description: 'For the obsessed collector 🎀',
                   features: [
                     'Everything in Pro',
                     'Public collection profile',
@@ -292,35 +310,35 @@ export default function HomePage() {
                     'Stack history & favorites',
                     'Priority support',
                   ],
-                  cta: 'Go Collector',
+                  cta: 'Go Collector 🌹',
                   href: '/signup?plan=collector',
                   highlighted: false,
                 },
               ].map((plan) => (
                 <div
                   key={plan.name}
-                  className={`border rounded-sm p-8 flex flex-col ${
+                  className={`rounded-3xl p-8 flex flex-col border ${
                     plan.highlighted
-                      ? 'border-primary bg-primary/5'
+                      ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
                       : 'border-border bg-card'
                   }`}
                 >
                   {plan.highlighted && (
-                    <p className="editorial-cap text-primary mb-4">Most Popular</p>
+                    <p className="pill w-fit mb-4">Most loved 💗</p>
                   )}
-                  <h3 className="text-2xl font-light mb-1" style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 400 }}>
+                  <h3 className="text-2xl font-bold mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
                     {plan.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground mb-6">{plan.description}</p>
-                  <div className="mb-8">
-                    <span className="text-3xl font-light" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                  <p className="text-xs text-muted-foreground mb-5">{plan.description}</p>
+                  <div className="mb-7">
+                    <span className="text-3xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
                       {plan.price}
                     </span>
                     <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>
                   </div>
-                  <ul className="space-y-3 mb-10 flex-1">
+                  <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                         <Check size={13} className="mt-0.5 shrink-0 text-primary" strokeWidth={2.5} />
                         {f}
                       </li>
@@ -329,7 +347,7 @@ export default function HomePage() {
                   <Button
                     asChild
                     variant={plan.highlighted ? 'default' : 'outline'}
-                    className="rounded-sm text-xs tracking-wide w-full"
+                    className="rounded-full text-xs font-semibold w-full"
                   >
                     <Link href={plan.href}>{plan.cta}</Link>
                   </Button>
@@ -342,26 +360,24 @@ export default function HomePage() {
       </main>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t border-border py-14 px-6">
+      <footer className="border-t border-border py-12 px-6 bg-card/50">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <p className="text-xl font-light mb-1" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                Your Scents
+              <p className="text-xl font-bold mb-1 flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+                🌸 Your Scents
               </p>
-              <p className="text-xs text-muted-foreground">
-                Built for the fragrance curious.
-              </p>
+              <p className="text-xs text-muted-foreground">Built for the fragrance-obsessed. 💗</p>
             </div>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 text-xs text-muted-foreground">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-5 text-xs text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
               <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
             </div>
           </div>
-          <div className="gold-line opacity-40 mt-10 mb-6" />
+          <div className="petal-line opacity-40 mt-8 mb-5" />
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Your Scents. All rights reserved.
+            © {new Date().getFullYear()} Your Scents. All rights reserved. ✨
           </p>
         </div>
       </footer>
