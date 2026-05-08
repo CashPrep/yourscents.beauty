@@ -2,44 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
 
 @layer base {
   :root {
-    /* Blush & cream palette — soft girl ✨ */
-    --background: 340 40% 98%;
-    --foreground: 340 15% 18%;
-    --card: 340 30% 96%;
-    --card-foreground: 340 15% 18%;
-    --popover: 340 40% 98%;
-    --popover-foreground: 340 15% 18%;
+    /* Warm luxury palette */
+    --background: 36 40% 97%;
+    --foreground: 24 20% 12%;
+    --card: 36 30% 94%;
+    --card-foreground: 24 20% 12%;
+    --popover: 36 40% 97%;
+    --popover-foreground: 24 20% 12%;
 
-    /* Rose pink primary */
-    --primary: 340 60% 58%;
+    /* Champagne gold primary */
+    --primary: 34 55% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 25% 93%;
-    --secondary-foreground: 340 15% 25%;
+    --secondary: 36 25% 90%;
+    --secondary-foreground: 24 20% 20%;
 
-    --muted: 340 20% 94%;
-    --muted-foreground: 340 10% 50%;
+    --muted: 36 20% 92%;
+    --muted-foreground: 24 10% 48%;
 
-    --accent: 350 50% 90%;
-    --accent-foreground: 340 15% 18%;
+    --accent: 34 45% 88%;
+    --accent-foreground: 24 20% 12%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 25% 88%;
-    --input: 340 25% 88%;
-    --ring: 340 60% 58%;
-    --radius: 1.5rem;
+    --border: 36 25% 86%;
+    --input: 36 25% 86%;
+    --ring: 34 55% 48%;
+    --radius: 1.25rem;
 
     /* Custom tokens */
-    --blush: 340 55% 85%;
-    --rose: 340 60% 58%;
-    --cream: 30 60% 97%;
-    --petal: 350 50% 90%;
+    --gold: 34 55% 48%;
+    --cream: 36 40% 97%;
+    --warm-black: 24 20% 10%;
+    --dust: 34 30% 88%;
   }
 }
 
@@ -56,16 +56,17 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: 'kern' 1, 'liga' 1;
-    background-image: radial-gradient(circle at 20% 0%, hsl(340 60% 95% / 0.6) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 100%, hsl(350 50% 94% / 0.5) 0%, transparent 50%);
+    background-image:
+      radial-gradient(ellipse at 10% 0%, hsl(34 55% 90% / 0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 100%, hsl(36 40% 88% / 0.30) 0%, transparent 55%);
   }
 
-  h1, h2, h3, .serif {
-    font-family: 'Playfair Display', Georgia, serif;
+  h1, h2, h3, h4, .serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
   }
 
   ::selection {
-    background: hsl(340 60% 58% / 0.2);
+    background: hsl(34 55% 48% / 0.18);
   }
 }
 
@@ -74,28 +75,50 @@
     text-wrap: balance;
   }
 
-  .petal-line {
-    background: linear-gradient(90deg, transparent, hsl(var(--blush)), transparent);
+  .divider-line {
+    background: linear-gradient(90deg, transparent, hsl(var(--dust)), transparent);
     height: 1px;
     width: 100%;
   }
 
   .label-tag {
     font-variant: small-caps;
-    letter-spacing: 0.12em;
-    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    font-size: 0.70rem;
     text-transform: uppercase;
     font-family: 'DM Sans', sans-serif;
   }
 
-  .pill {
-    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium;
-    background: hsl(var(--petal));
-    color: hsl(var(--rose));
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium;
+    background: hsl(var(--dust));
+    color: hsl(var(--gold));
+    border: 1px solid hsl(34 55% 75% / 0.4);
   }
 
   .card-soft {
-    @apply rounded-3xl border border-border bg-card p-6;
-    box-shadow: 0 2px 20px hsl(340 40% 85% / 0.25);
+    @apply rounded-2xl border border-border bg-card p-6;
+    box-shadow: 0 2px 24px hsl(34 30% 70% / 0.15);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-soft:hover {
+    box-shadow: 0 6px 32px hsl(34 30% 60% / 0.22);
+    transform: translateY(-2px);
+  }
+
+  .photo-frame {
+    @apply rounded-2xl overflow-hidden;
+    box-shadow: 0 8px 48px hsl(24 20% 12% / 0.14);
+  }
+
+  .hero-gradient {
+    background: linear-gradient(160deg, hsl(36 40% 97%) 0%, hsl(34 50% 94%) 100%);
+  }
+
+  .testimonial-card {
+    @apply rounded-2xl border border-border bg-card/80 p-6;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 20px hsl(34 30% 70% / 0.12);
   }
 }
