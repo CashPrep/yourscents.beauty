@@ -22,9 +22,13 @@ export default function AddFragranceModal({ onClose, onAdded }: Props) {
     if (query.length < 2) { setResults([]); return }
     const timeout = setTimeout(async () => {
       setLoading(true)
-      const res = await fetch(`/api/fragrances/search?q=${encodeURIComponent(query)}`)
-      const data = await res.json()
-      setResults(data.results || [])
+      try {
+        const res = await fetch(`/api/fragrances/search?q=${encodeURIComponent(query)}`)
+        const data = await res.json()
+        setResults(data.results || [])
+      } catch {
+        setResults([])
+      }
       setLoading(false)
     }, 400)
     return () => clearTimeout(timeout)
@@ -32,28 +36,78 @@ export default function AddFragranceModal({ onClose, onAdded }: Props) {
 
   const handleAdd = async (fragrance: any) => {
     setAdding(fragrance.id)
-    const res = await fetch('/api/wardrobe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fragrance_id: fragrance.id,
-        fragrance_name: fragrance.name,
-        brand: fragrance.brand,
-        notes: [
-          ...(fragrance.notes?.top || []),
-          ...(fragrance.notes?.middle || []),
-          ...(fragrance.notes?.base || []),
-        ],
-        accords: fragrance.accords || [],
-        image_url: fragrance.image_url || fragrance.image || null,
-      }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      onAdded(data)
-      toast({ title: 'Added to wardrobe!', description: `${fragrance.name} by ${fragrance.brand}` })
-    } else {
-      toast({ title: 'Error', description: data.error, variant: 'destructive' })
+    try {
+      // ── Step 1: fetch the FULL fragrance detail to get all notes ──────────
+      // Search results only return basic fields; the detail endpoint returns
+      // the complete top / middle (heart) / base note breakdown.
+      let fullFragrance = fragrance
+      try {
+        const detailRes = await fetch(`/api/fragrances/${fragrance.id}`)
+        if (detailRes.ok) {
+          const detail = await detailRes.json()
+          // Merge detail over the search result so we keep image_url etc.
+          fullFragrance = { ...fragrance, ...detail }
+        }
+      } catch {
+        // If detail fetch fails, fall back to whatever the search result gave us
+      }
+
+      // ── Step 2: flatten all notes into one array ──────────────────────────
+      // Support both possible API shapes:
+      //   { notes: { top: [], middle: [], base: [] } }   (Fragella standard)
+      //   { top_notes: [], heart_notes: [], base_notes: [] }  (alt shape)
+      const topNotes =
+        fullFragrance.notes?.top ||
+        fullFragrance.top_notes ||
+        []
+      const middleNotes =
+        fullFragrance.notes?.middle ||
+        fullFragrance.notes?.heart ||
+        fullFragrance.heart_notes ||
+        fullFragrance.middle_notes ||
+        []
+      const baseNotes =
+        fullFragrance.notes?.base ||
+        fullFragrance.base_notes ||
+        []
+
+      const allNotes = [
+        ...topNotes.map((n: any) => (typeof n === 'string' ? n : n.name)),
+        ...middleNotes.map((n: any) => (typeof n === 'string' ? n : n.name)),
+        ...baseNotes.map((n: any) => (typeof n === 'string' ? n : n.name)),
+      ].filter(Boolean)
+
+      // ── Step 3: save to wardrobe with structured note data ────────────────
+      const res = await fetch('/api/wardrobe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fragrance_id: fullFragrance.id,
+          fragrance_name: fullFragrance.name,
+          brand: fullFragrance.brand,
+          notes: allNotes,
+          notes_structured: {
+            top: topNotes.map((n: any) => (typeof n === 'string' ? n : n.name)).filter(Boolean),
+            middle: middleNotes.map((n: any) => (typeof n === 'string' ? n : n.name)).filter(Boolean),
+            base: baseNotes.map((n: any) => (typeof n === 'string' ? n : n.name)).filter(Boolean),
+          },
+          accords: fullFragrance.accords || [],
+          image_url: fullFragrance.image_url || fullFragrance.image || null,
+        }),
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        onAdded(data)
+        toast({
+          title: 'Added to wardrobe! 🌸',
+          description: `${fullFragrance.name} by ${fullFragrance.brand} — ${allNotes.length} notes loaded`,
+        })
+      } else {
+        toast({ title: 'Error', description: data.error, variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' })
     }
     setAdding(null)
   }
@@ -62,7 +116,7 @@ export default function AddFragranceModal({ onClose, onAdded }: Props) {
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-bold text-lg">Add Fragrance</h2>
+          <h2 className="font-bold text-lg">Add Fragrance 🌸</h2>
           <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg"><X className="h-4 w-4" /></button>
         </div>
         <div className="p-4 border-b">
