@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
-import { Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp, Dna, Share2, Zap, Brain, CloudSun } from 'lucide-react'
+import Link from 'next/link'
+import { Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp, Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -15,14 +16,16 @@ import StackSuggestions from './StackSuggestions'
 import MoodMatcher from './MoodMatcher'
 import SeasonalRotation from './SeasonalRotation'
 
-// ── Brand tokens (matches globals.css) ────────────────────────────────────────
-const ROSE       = 'hsl(8 48% 72%)'          // dusty rose primary
-const ROSE_BG    = 'hsl(8 56% 76% / 0.12)'   // rose tint background
-const ROSE_BORDER= 'hsl(8 56% 76% / 0.32)'   // rose border
-const ROSE_DEEP  = 'hsl(3 40% 58%)'          // mauve rose deep
-const CREAM      = 'hsl(18 50% 97%)'         // page background cream
-const FOREGROUND = 'hsl(5 25% 22%)'          // warm near-black
-const MUTED      = 'hsl(8 15% 52%)'          // muted text
+// ── Brand tokens ────────────────────────────────────────────────────────────
+const ROSE        = 'hsl(8 48% 72%)'
+const ROSE_BG     = 'hsl(8 56% 76% / 0.12)'
+const ROSE_BORDER = 'hsl(8 56% 76% / 0.32)'
+const ROSE_DEEP   = 'hsl(3 40% 58%)'
+const CREAM       = 'hsl(18 50% 97%)'
+const FOREGROUND  = 'hsl(5 25% 22%)'
+const MUTED       = 'hsl(8 15% 52%)'
+
+const FREE_LIMIT = 3
 
 interface Props {
   user: any
@@ -41,16 +44,108 @@ const SORT_OPTIONS = [
 
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
+// ── Free plan upgrade gate banner ───────────────────────────────────────────
+function FreePlanGate() {
+  return (
+    <div
+      className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      style={{
+        background: `linear-gradient(135deg, hsl(8 56% 76% / 0.10), hsl(8 56% 76% / 0.18))`,
+        border: `1.5px solid ${ROSE_BORDER}`,
+        boxShadow: `0 4px 24px hsl(8 56% 76% / 0.12)`,
+      }}
+    >
+      <div className="flex items-start gap-4">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: ROSE_BG, border: `1px solid ${ROSE_BORDER}` }}
+        >
+          <Lock className="h-4 w-4" style={{ color: ROSE_DEEP }} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold mb-1" style={{ color: FOREGROUND }}>
+            You've reached the 3-fragrance limit
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: MUTED }}>
+            Free plan includes up to {FREE_LIMIT} fragrances. Upgrade to Pro for an unlimited wardrobe,
+            full stack scoring, and shareable scent cards.
+          </p>
+        </div>
+      </div>
+      <Link href="/signup?plan=pro" className="shrink-0">
+        <button
+          className="btn-gold flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap"
+        >
+          Upgrade to Pro
+          <ArrowRight className="h-3 w-3" />
+        </button>
+      </Link>
+    </div>
+  )
+}
+
+// ── Scent card share panel ───────────────────────────────────────────────────
+function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: boolean; onCopy: () => void }) {
+  const profileUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/u/${userId}`
+  return (
+    <div
+      className="rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"
+      style={{
+        background: 'hsl(0 0% 100%)',
+        border: `1px solid ${ROSE_BORDER}`,
+        boxShadow: `0 4px 20px hsl(8 56% 76% / 0.10)`,
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: ROSE_BG }}
+        >
+          <Share2 className="h-4 w-4" style={{ color: ROSE }} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold mb-0.5" style={{ color: FOREGROUND }}>Your Scent Card</p>
+          <p className="text-[11px] font-mono truncate max-w-[220px]" style={{ color: MUTED }}>
+            yourscents.app/u/{userId.slice(0, 8)}…
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <a
+          href={`/u/${userId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full transition-colors"
+          style={{ background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}` }}
+        >
+          <ExternalLink className="h-3 w-3" />
+          Preview
+        </a>
+        <button
+          onClick={onCopy}
+          className="btn-gold flex items-center gap-1.5 text-xs px-4 py-2"
+        >
+          <Share2 className="h-3 w-3" />
+          {copied ? 'Copied! 🌸' : 'Copy Link'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardClient({ user, wardrobe: initialWardrobe, profile }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const [wardrobe, setWardrobe]       = useState(initialWardrobe)
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [activeTab, setActiveTab]     = useState<Tab>('wardrobe')
-  const [sort, setSort]               = useState('recent')
-  const [accordFilter, setAccordFilter] = useState('all')
-  const [copied, setCopied]           = useState(false)
+  const [wardrobe, setWardrobe]           = useState(initialWardrobe)
+  const [showAddModal, setShowAddModal]   = useState(false)
+  const [activeTab, setActiveTab]         = useState<Tab>('wardrobe')
+  const [sort, setSort]                   = useState('recent')
+  const [accordFilter, setAccordFilter]   = useState('all')
+  const [copied, setCopied]               = useState(false)
+  const [addBlocked, setAddBlocked]       = useState(false)
   const plan = profile?.plan || 'free'
+  const isFree = plan === 'free'
+  const atLimit = isFree && wardrobe.length >= FREE_LIMIT
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -60,11 +155,21 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   const handleFragranceAdded = (item: any) => {
     setWardrobe((prev: any[]) => [item, ...prev])
     setShowAddModal(false)
+    setAddBlocked(false)
+  }
+
+  const handleAddClick = () => {
+    if (atLimit) {
+      setAddBlocked(true)
+      return
+    }
+    setShowAddModal(true)
   }
 
   const handleRemove = async (id: string) => {
     await fetch('/api/wardrobe', { method: 'DELETE', body: JSON.stringify({ id }), headers: { 'Content-Type': 'application/json' } })
     setWardrobe((prev: any[]) => prev.filter((i: any) => i.id !== id))
+    setAddBlocked(false)
   }
 
   const handleRatingUpdate = (id: string, rating: number, note: string) => {
@@ -75,7 +180,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
     const url = `${window.location.origin}/u/${user.id}`
     navigator.clipboard.writeText(url)
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setCopied(false), 2500)
   }
 
   const displayWardrobe = [...wardrobe]
@@ -116,31 +221,22 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           'radial-gradient(ellipse 70% 40% at 50% -5%, hsl(8 56% 76% / 0.12) 0%, transparent 65%), radial-gradient(ellipse 50% 30% at 100% 100%, hsl(13 48% 65% / 0.08) 0%, transparent 60%)',
       }}
     >
-      {/* ── Sticky header ─────────────────────────────────────────────────── */}
+      {/* ── Header ── */}
       <header
         className="border-b sticky top-0 z-40"
-        style={{
-          background: 'hsl(18 60% 98% / 0.88)',
-          backdropFilter: 'blur(18px)',
-          borderColor: 'hsl(10 30% 88%)',
-        }}
+        style={{ background: 'hsl(18 60% 98% / 0.88)', backdropFilter: 'blur(18px)', borderColor: 'hsl(10 30% 88%)' }}
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'hsl(18 67% 96%)' }}
-            >
-              <Image src="/logo.png" alt="Your Scents" width={22} height={22} className="object-contain" />
-            </div>
-            <span className="font-semibold text-sm tracking-tight serif" style={{ color: FOREGROUND }}>Your Scents</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold ml-1" style={planStyle}>
+          {/* Full logo — no circle crop */}
+          <div className="flex items-center gap-3">
+            <Link href="/">
+              <Image src="/logo.png" alt="Your Scents" width={120} height={44} className="h-10 w-auto object-contain" />
+            </Link>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={planStyle}>
               {planLabel}
             </span>
           </div>
-
-          {/* Right side */}
+          {/* Right: share + email + logout */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleShare}
@@ -148,7 +244,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               style={{ background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}` }}
             >
               <Share2 className="h-3 w-3" />
-              {copied ? 'Copied!' : 'Share'}
+              {copied ? 'Copied! 🌸' : 'My Scent Card'}
             </button>
             <span className="text-xs hidden sm:block" style={{ color: MUTED }}>{user.email}</span>
             <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8">
@@ -160,17 +256,22 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
 
       <div className="max-w-6xl mx-auto px-4 py-6">
 
-        {/* Scent of the Day */}
+        {/* ── Scent card panel (always visible) ── */}
+        {wardrobe.length > 0 && (
+          <ScentCardPanel userId={user.id} copied={copied} onCopy={handleShare} />
+        )}
+
+        {/* ── Scent of the Day ── */}
         {wardrobe.length > 0 && (
           <div className="mb-6"><ScentOfTheDay wardrobe={wardrobe} /></div>
         )}
 
-        {/* Stats row */}
+        {/* ── Stats row ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: 'Bottles',    value: wardrobe.length,                icon: Star },
+            { label: 'Bottles',    value: isFree ? `${wardrobe.length} / ${FREE_LIMIT}` : `${wardrobe.length}`, icon: Star },
             { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—', icon: Sparkles },
-            { label: 'Plan',       value: planLabel,                      icon: Zap },
+            { label: 'Plan',       value: planLabel, icon: Zap },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="panel-glow rounded-xl p-4">
               <div className="flex items-center gap-2 mb-1">
@@ -182,7 +283,14 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           ))}
         </div>
 
-        {/* Tabs */}
+        {/* ── Free plan gate banner ── */}
+        {atLimit && (
+          <div className="mb-6">
+            <FreePlanGate />
+          </div>
+        )}
+
+        {/* ── Tabs ── */}
         <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
           {tabs.map(({ id, label, icon: Icon, badge, isNew }) => (
             <button
@@ -211,7 +319,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           ))}
         </div>
 
-        {/* Tab: Wardrobe */}
+        {/* ── Tab: Wardrobe ── */}
         {activeTab === 'wardrobe' && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -242,15 +350,31 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
+                {/* Add button — disabled at limit for free users */}
                 <button
-                  onClick={() => setShowAddModal(true)}
-                  className="btn-gold flex items-center gap-1.5 text-xs px-4 py-2"
+                  onClick={handleAddClick}
+                  className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-semibold transition-all"
+                  style={
+                    atLimit
+                      ? { background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}`, cursor: 'default' }
+                      : undefined
+                  }
+                  title={atLimit ? 'Upgrade to add more fragrances' : 'Add fragrance'}
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add
+                  {atLimit
+                    ? <><Lock className="h-3 w-3" /> Upgrade</>  
+                    : <><Plus className="h-3.5 w-3.5" /> Add</> 
+                  }
                 </button>
               </div>
             </div>
+
+            {/* Inline upgrade nudge when user clicks locked Add button */}
+            {addBlocked && atLimit && (
+              <div className="mb-5">
+                <FreePlanGate />
+              </div>
+            )}
 
             {displayWardrobe.length === 0 && (
               <div
@@ -260,10 +384,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
                 <Sparkles className="h-10 w-10 mx-auto mb-4" style={{ color: ROSE }} />
                 <p className="text-sm font-medium mb-2" style={{ color: FOREGROUND }}>Your wardrobe is empty</p>
                 <p className="text-xs mb-6" style={{ color: MUTED }}>Add your first fragrance to get started</p>
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="btn-gold text-sm px-6 py-2.5"
-                >
+                <button onClick={() => setShowAddModal(true)} className="btn-gold text-sm px-6 py-2.5">
                   Add Fragrance ✨
                 </button>
               </div>
