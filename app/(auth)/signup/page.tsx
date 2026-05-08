@@ -1,13 +1,12 @@
 'use client'
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
-const ROSE = 'hsl(340 55% 62%)'
 
 function SignupForm() {
   const router = useRouter()
@@ -57,24 +56,48 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      {/* Rose blush background accents */}
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: 'hsl(18 50% 97%)',
+        backgroundImage:
+          'radial-gradient(ellipse 70% 40% at 50% -5%, hsl(8 56% 76% / 0.12) 0%, transparent 65%), radial-gradient(ellipse 50% 30% at 100% 100%, hsl(13 48% 65% / 0.08) 0%, transparent 60%)',
+      }}
+    >
+      {/* Subtle blush orbs matching homepage */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(340 55% 88% / 0.35)' }} />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(300 30% 88% / 0.28)' }} />
+        <div
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl"
+          style={{ background: 'hsl(10 60% 84% / 0.30)' }}
+        />
+        <div
+          className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl"
+          style={{ background: 'hsl(13 48% 65% / 0.18)' }}
+        />
       </div>
 
-      <div className="relative bg-card border border-border rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        {/* Logo */}
+      <div className="panel-glow relative w-full max-w-sm p-8">
+        {/* Logo — cream background blends with logo palette */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: ROSE }}>
-            <span className="text-white text-sm font-bold">S</span>
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'hsl(18 67% 96%)' }}
+          >
+            <Image
+              src="/logo.png"
+              alt="Your Scents"
+              width={28}
+              height={28}
+              className="object-contain"
+            />
           </div>
-          <span className="text-lg font-medium serif">Your Scents</span>
+          <span className="text-lg font-medium serif" style={{ color: 'hsl(5 25% 22%)' }}>
+            Your Scents
+          </span>
         </Link>
 
         <h1 className="text-2xl font-light serif mb-1.5 text-center">Join the girls ✨</h1>
-        <p className="text-muted-foreground text-sm mb-7 text-center">
+        <p className="text-sm mb-7 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
           {plan !== 'free'
             ? `Getting started with the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan 🌸`
             : 'Start free — no credit card needed 💕'}
@@ -105,33 +128,33 @@ function SignupForm() {
               minLength={8} required className="rounded-xl"
             />
           </div>
-          {error && <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-3 py-2">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive rounded-lg bg-destructive/10 px-3 py-2">
+              {error}
+            </p>
+          )}
           <Button
             type="submit"
-            className="w-full rounded-full font-semibold text-sm mt-1"
-            style={{ background: ROSE, color: '#fff' }}
+            className="btn-gold w-full text-sm mt-1"
             disabled={loading}
           >
-            {loading ? 'Creating account...' : 'Create Account 🌸'}
+            {loading ? 'Creating account…' : 'Create Account 🌸'}
           </Button>
         </form>
 
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-card px-2 text-muted-foreground">or</span>
-          </div>
-        </div>
+        <div className="rule my-5" />
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold hover:underline" style={{ color: ROSE }}>
+          <Link
+            href="/login"
+            className="font-semibold hover:underline"
+            style={{ color: 'hsl(8 48% 72%)' }}
+          >
             Sign in
           </Link>
         </p>
-        <p className="text-center text-xs text-muted-foreground mt-2">
+        <p className="text-center text-xs mt-2" style={{ color: 'hsl(8 15% 52%)' }}>
           <Link href="/" className="hover:underline opacity-60">← Back to home</Link>
         </p>
       </div>
