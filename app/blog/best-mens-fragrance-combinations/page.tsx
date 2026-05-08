@@ -32,25 +32,25 @@ export default function ArticlePage() {
             <span className="chip text-[10px]" style={{ padding: '2px 10px' }}>Stack Guide</span>
             <span className="text-[11px] font-mono" style={{ color: MUTED }}>7 min read · May 2026</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-normal serif leading-tight mb-5" style={{ color: FG }}>The Best Men's Fragrance Combinations That Actually Work</h1>
-          <p className="text-lg leading-relaxed" style={{ color: MUTED }}>Layering isn't just a trend. These specific combos have been tested on real skin — with exactly why each pairing is effective.</p>
+          <h1 className="text-4xl md:text-5xl font-normal serif leading-tight mb-5" style={{ color: FG }}>The Best Men&apos;s Fragrance Combinations That Actually Work</h1>
+          <p className="text-lg leading-relaxed" style={{ color: MUTED }}>Layering isn&apos;t just a trend. These specific combos have been tested on real skin — with exactly why each pairing is effective.</p>
         </div>
 
         <div className="prose-article">
-          <p>Layering men's fragrance is different from layering women's in one important way: the note families you're working with tend to be drier and more linear. Most popular men's fragrances are built around a woody-aromatic or fresh-citrus structure, which makes them easier to layer without conflict but requires more precision to make something genuinely interesting.</p>
+          <p>Layering men&apos;s fragrance is different from layering women&apos;s in one important way: the note families you&apos;re working with tend to be drier and more linear. Most popular men&apos;s fragrances are built around a woody-aromatic or fresh-citrus structure, which makes them easier to layer without conflict but requires more precision to make something genuinely interesting.</p>
 
           <div className="callout">
             <p className="callout-title">Sauvage + Aventus</p>
-            <p><strong>Compatibility: Exceptional.</strong> Apply Aventus first — let the pineapple and bergamot top open for 3–5 minutes. Then one spray of Sauvage across the chest. The ambroxan in Sauvage acts as an amplifier, turning up the volume on Aventus's woody-smoky base without adding a competing note. The result is a more dimensional, more projected Aventus. One spray only — ambroxan is potent.</p>
+            <p><strong>Compatibility: Exceptional.</strong> Apply Aventus first — let the pineapple and bergamot top open for 3–5 minutes. Then one spray of Sauvage across the chest. The ambroxan in Sauvage acts as an amplifier, turning up the volume on Aventus&apos;s woody-smoky base without adding a competing note. The result is a more dimensional, more projected Aventus. One spray only — ambroxan is potent.</p>
           </div>
 
           <div className="callout">
             <p className="callout-title">Oud Wood + Molecule 01</p>
-            <p><strong>Compatibility: Excellent.</strong> Molecule 01 is almost entirely Iso E Super — a cedarwood-derived aromachemical that amplifies woody fragrances and significantly extends longevity. Apply Molecule 01 first (it's near-scentless). Then apply Oud Wood to pulse points. The cedar and rosewood in Oud Wood push from 6–7 hours toward 10–12. The combination also acquires a slightly more skin-close quality — better for intimate settings.</p>
+            <p><strong>Compatibility: Excellent.</strong> Molecule 01 is almost entirely Iso E Super — a cedarwood-derived aromachemical that amplifies woody fragrances and significantly extends longevity. Apply Molecule 01 first (it&apos;s near-scentless). Then apply Oud Wood to pulse points. The cedar and rosewood in Oud Wood push from 6–7 hours toward 10–12. The combination also acquires a slightly more skin-close quality — better for intimate settings.</p>
           </div>
 
           <div className="callout">
-            <p className="callout-title">Bleu de Chanel + Terre d'Hermès</p>
+            <p className="callout-title">Bleu de Chanel + Terre d&apos;Hermès</p>
             <p><strong>Compatibility: Very Good.</strong> Both share the woody-citrus structure — they layer without fighting. Terre adds earthy, flint-and-pepper complexity that Bleu lacks. The grapefruit in both bridges them into a single coherent accord. Apply Terre first, then Bleu. Moderate projection, sophisticated character. Excellent for work environments.</p>
           </div>
 
