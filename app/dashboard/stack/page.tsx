@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import StackBuilder from '@/components/dashboard/StackBuilder'
 
 export default async function StackPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 

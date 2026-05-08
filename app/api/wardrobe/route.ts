@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
   const { fragrance_id, fragrance_name, brand, notes, accords, image_url } = body
 
-  // Check free plan limit
   const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
   if (profile?.plan === 'free') {
     const { count } = await supabase.from('wardrobe_items').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
