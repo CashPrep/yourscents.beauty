@@ -99,10 +99,14 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               <div>
                 <h2 className="text-xl font-bold">My Fragrance Wardrobe</h2>
                 <p className="text-sm text-muted-foreground">
-                  {plan === 'free' ? `${wardrobe.length}/10 fragrances (Free plan)` : `${wardrobe.length} fragrances`}
+                  {plan === 'free' ? `${wardrobe.length}/3 fragrances (Free plan)` : `${wardrobe.length} fragrances`}
                 </p>
               </div>
-              <Button onClick={() => setShowAddModal(true)} className="gap-2">
+              <Button
+                onClick={() => setShowAddModal(true)}
+                className="gap-2"
+                disabled={plan === 'free' && wardrobe.length >= 3}
+              >
                 <Plus className="h-4 w-4" /> Add Fragrance
               </Button>
             </div>
@@ -120,7 +124,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
                 ))}
               </div>
             )}
-            {plan === 'free' && wardrobe.length >= 10 && (
+            {plan === 'free' && wardrobe.length >= 3 && (
               <div className="mt-6 p-4 bg-accent rounded-2xl border border-primary/20 text-center">
                 <p className="text-sm font-medium text-primary">You've reached the Free plan limit.</p>
                 <p className="text-sm text-muted-foreground mb-3">Upgrade to Pro for unlimited fragrances.</p>
