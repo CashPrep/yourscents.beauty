@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -30,22 +31,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-C4460XTQ0N" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-C4460XTQ0N');
-            `,
-          }}
-        />
-      </head>
       <body>
         {children}
         <Toaster />
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-C4460XTQ0N"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-C4460XTQ0N', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
       </body>
     </html>
   )
