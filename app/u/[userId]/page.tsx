@@ -28,7 +28,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   if (!profile || !items) return notFound()
 
-  const name = profile.full_name || 'A ScentStack user'
+  const name = profile.full_name || 'A Your Scents user'
 
   return (
     <div
@@ -45,17 +45,21 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(13 48% 65% / 0.16)' }} />
       </div>
 
-      {/* Nav */}
+      {/* Nav — full logo, matches rest of site */}
       <header
         className="fixed top-0 inset-x-0 z-50 border-b"
-        style={{ background: 'hsl(18 60% 98% / 0.88)', backdropFilter: 'blur(18px)', borderColor: 'hsl(10 30% 88%)' }}
+        style={{ background: 'hsl(18 60% 98% / 0.92)', backdropFilter: 'blur(20px)', borderColor: ROSE_BORDER }}
       >
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'hsl(18 67% 96%)' }}>
-              <Image src="/logo.png" alt="Your Scents" width={18} height={18} className="object-contain" />
-            </div>
-            <span className="text-sm font-semibold serif" style={{ color: FOREGROUND }}>Your Scents</span>
+        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Your Scents"
+              width={120}
+              height={48}
+              className="h-11 w-auto object-contain"
+              priority
+            />
           </Link>
           <Link href="/signup">
             <button className="btn-gold text-xs px-4 py-1.5">Start Free ✨</button>
@@ -86,7 +90,11 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {items.map((item: any) => (
-              <div key={item.id} className="panel-glow flex flex-col gap-2 p-4">
+              <div
+                key={item.id}
+                className="panel-glow flex flex-col gap-2 p-4 rounded-2xl"
+                style={{ background: 'hsl(0 0% 100%)', border: `1px solid ${ROSE_BORDER}` }}
+              >
                 <div
                   className="w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center"
                   style={{ background: 'hsl(10 60% 97%)', border: `1px solid ${ROSE_BORDER}` }}

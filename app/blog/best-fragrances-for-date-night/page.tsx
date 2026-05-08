@@ -1,31 +1,28 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Best Fragrances for Date Night (And How to Stack Them) | ScentStack',
-  description: 'The fragrances that actually work for date night — not just the ones that get recommended. Plus exactly how to layer them for maximum effect.',
-  keywords: ['best perfume for date night', 'date night fragrance', 'romantic cologne', 'best cologne for dates', 'fragrance for dating'],
-  openGraph: {
-    title: 'Best Fragrances for Date Night (And How to Stack Them)',
-    description: 'The fragrances that actually work for date night — not just the ones that get recommended.',
-    type: 'article',
-  },
+  title: "The Best Fragrances for Date Night | Your Scents",
+  description: "Not all date night fragrances are created equal. Here's what projects well, lasts through dinner, and stacks effectively.",
+  openGraph: { title: "The Best Fragrances for Date Night (And How to Stack Them)", description: "What actually works for date night — projection, longevity, and pairings.", type: 'article' },
 }
 
-const GOLD = 'hsl(42 85% 68%)'
+const R_DEEP   = 'hsl(3 40% 58%)'
+const R_BORDER = 'hsl(8 56% 76% / 0.32)'
+const CREAM    = 'hsl(18 50% 97%)'
+const FG       = 'hsl(5 25% 22%)'
+const MUTED    = 'hsl(8 15% 52%)'
 
 export default function ArticlePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GOLD }}>
-              <span className="text-[hsl(220_18%_6%)] text-xs font-bold">S</span>
-            </div>
-            <span className="text-base font-semibold tracking-tight">ScentStack</span>
+    <div className="min-h-screen" style={{ background: CREAM }}>
+      <header className="fixed top-0 inset-x-0 z-50 border-b" style={{ background: 'hsl(18 60% 98% / 0.92)', backdropFilter: 'blur(20px)', borderColor: R_BORDER }}>
+        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/">
+            <Image src="/logo.png" alt="Your Scents" width={120} height={48} className="h-11 w-auto object-contain" priority />
           </Link>
-          <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← All guides</Link>
+          <Link href="/blog" className="text-sm hover:text-foreground transition-colors" style={{ color: MUTED }}>← All guides</Link>
         </div>
       </header>
 
@@ -33,92 +30,52 @@ export default function ArticlePage() {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-5">
             <span className="chip text-[10px]" style={{ padding: '2px 10px' }}>Occasion Guide</span>
-            <span className="text-[11px] text-muted-foreground font-mono">6 min read · May 2026</span>
+            <span className="text-[11px] font-mono" style={{ color: MUTED }}>6 min read · May 2026</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-normal serif leading-tight mb-5">
-            The Best Fragrances for Date Night (And How to Stack Them)
-          </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            The problem with most date night fragrance advice is that it\'s written by people recommending whatever\'s popular, not whatever actually performs on a date. Here\'s what to consider and what\'s genuinely worth wearing.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-normal serif leading-tight mb-5" style={{ color: FG }}>The Best Fragrances for Date Night (And How to Stack Them)</h1>
+          <p className="text-lg leading-relaxed" style={{ color: MUTED }}>Not all date night fragrances are created equal. Some project too loud. Some fade before dinner ends. Here's what actually works.</p>
         </div>
 
         <div className="prose-article">
+          <p>Date night fragrance has a specific brief: intimate projection, moderate-to-strong longevity, and a character that's interesting close-up without being aggressive at arm's length. Most fragrances fail at least one of those criteria.</p>
 
-          <p>
-            Date night fragrance has specific requirements that most other occasions don\'t. You need something that works in close proximity — that means projection matters less than skin-presence, or what the fragrance community calls "sillage up close." You also need longevity through a multi-hour evening. And you need something that doesn\'t announce itself the moment you walk in the room.
-          </p>
-
-          <h2>What to look for (and avoid)</h2>
-          <p>
-            Avoid high-projection freshies for close encounters. A lot of popular fragrances — Sauvage, Bleu, the entire aquatic genre — are designed to project outward and fill a room. That\'s great for the office or a social event, but on a date those same fragrances can feel aggressive in close quarters. What you want is something that\'s detectable up close but not confrontational from across the table.
-          </p>
-          <p>
-            What works well is warm, skin-close base notes — musks, ambers, sandalwood, vanilla — that invite proximity rather than announce presence. Fragrance that makes someone want to lean in is doing date night correctly.
-          </p>
-
-          <h2>The best solo options</h2>
-
-          <h3>Tom Ford Oud Wood</h3>
-          <p>
-            Oud Wood is the single best date night fragrance for people who want to smell like nothing else in the room. It\'s warm, woody, a little smoky, and completely unhurried. The oud is refined rather than raw — it won\'t scare anyone — and the amber and vanilla in the base do exactly the skin-presence trick you want. It lasts all evening without requiring a reapplication. Apply it 20–30 minutes before you leave so the top notes have time to settle and you arrive wearing the heart and base.
-          </p>
-
-          <h3>Creed Aventus</h3>
-          <p>
-            Aventus has the reputation it has for a reason. The pineapple and birch opening is unusual and confident, and the dry musk-and-ambergris base is excellent at close range. The projection is moderate — present but not loud. It also has a quality that\'s hard to describe but easy to notice: it smells like it\'s been planned, not just applied. Confident without trying.
-          </p>
-
-          <h3>Maison Margiela Replica — By the Fireplace</h3>
-          <p>
-            If the evening is dinner rather than dancing, By the Fireplace creates an immediate atmosphere. Chestnut, guaiac wood, and the smoked vanilla base make it feel genuinely cozy and warm. It\'s not a fragrance that asks for attention — it just makes the space feel more intimate. Excellent for autumn and winter dates.
-          </p>
-
-          <h3>Yves Saint Laurent Myslf</h3>
-          <p>
-            MYSLF is the most accessible option on this list. The bergamot and ambrette top is fresh without being generic, and the skin-close woody drydown has a subtle sweetness that makes it more date-appropriate than a standard aromatic fougère. It\'s also more approachable in close quarters than the usual YSL heavy-hitter, La Nuit de L\'Homme.
-          </p>
-
-          <h2>The best layered stacks</h2>
+          <h2>What "intimate projection" actually means</h2>
+          <p>Projection is how far a fragrance radiates from skin. Sillage is the trail it leaves. For date night, you want a fragrance that's noticeable within 1–2 feet but doesn't arrive in the room before you do. Heavy ambroxan-based fragrances (Sauvage, most flankers) project too broadly. Skin-scent musks (Glossier You, Maison Margiela Replica Lazy Sunday Morning) project well within close range but may be too subtle for an opening statement.</p>
+          <p>The sweet spot: oriental-florals and musky-florals. They project warmly without diffusing widely. Black Opium, YSL Libre, Lancôme La Vie Est Belle, Viktor &amp; Rolf Flowerbomb all hit this range.</p>
 
           <div className="callout">
-            <p className="callout-title">Dark Romance Stack</p>
-            <p><strong>Tom Ford Oud Wood + Maison Margiela Flower Market</strong></p>
-            <p>Apply Oud Wood to pulse points and let it sit for five full minutes. Then add a single spray of Flower Market to the collarbone only. What happens is the soft peony and heliotrope of Flower Market floats on the warm amber-oud base and the contrast — dry warmth underneath, fresh floral on top — is what makes people stop mid-conversation. Don\'t use more than one spray of Flower Market; it\'s strong enough that any more tips the balance.</p>
+            <p className="callout-title">Black Opium + Flowerbomb</p>
+            <p>Apply Flowerbomb first — it's the louder, richer of the two and needs to settle. Wait five minutes. Then add one spray of Black Opium to the wrists. The coffee-vanilla of Black Opium merges with the sweet-floral of Flowerbomb and creates a single, more complex accord than either achieves alone. The combination has exceptional longevity — both fragrances have strong base notes that anchor each other.</p>
           </div>
 
           <div className="callout">
-            <p className="callout-title">The Confident Stack</p>
-            <p><strong>Creed Aventus + Dior Sauvage (light hand)</strong></p>
-            <p>Apply Aventus first — the fruity-chypre top needs time to open before you add anything. After 3 minutes, spray Sauvage once across the chest only. The ambroxan in Sauvage acts as an amplifier for everything around it, making the Aventus smokiness and birch more pronounced without adding new notes on top. The result has a presence that\'s hard to explain but easy to notice in a room.</p>
+            <p className="callout-title">YSL Libre + Mugler Alien</p>
+            <p>This is a more unusual pairing. Libre is a lavender-orange blossom-musk built around a gender-fluid tension between floral and aromatic. Alien is a white floral amber — Casablanca lily over white amber. The two share a warmth and a slightly abstract quality that makes the combination smell expensive and hard to identify. Apply Alien first (it's heavier), then Libre on top. Moderate projection, very good longevity.</p>
           </div>
 
-          <h2>How many sprays on a date</h2>
-          <p>
-            Half your normal application. This is the rule. One spray per fragrance when layering, two at most when wearing solo. The intimacy of the context means projection and longevity don\'t need to carry the weight they do elsewhere. Your date will be within a few feet of you — fragrance doesn\'t need to travel.
-          </p>
-          <p>
-            The other thing to consider: reapplication at the end of the night is better than front-loading. A very light touch-up after dinner keeps you smelling intentional rather than like the fragrance is wearing you.
-          </p>
+          <h2>Fragrances that don't work for date night</h2>
+          <p>Aquatics and fresh citruses fade too quickly — you'll be unscented by the main course. Heavy ouds project too broadly and read as high-effort. Extremely linear fragrances (same note from application to drydown) don't reward closeness — part of what makes a fragrance attractive is the way it evolves over time.</p>
 
-          <h2>Timing your application</h2>
-          <p>
-            The worst thing you can do is spray on your way out the door. Top notes on most evening fragrances are sharp, sometimes borderline aggressive — that\'s their job. They\'re designed to fade quickly into the heart notes, which is where the real character lives. Apply 20–30 minutes before you leave the house. By the time you arrive, the top notes are gone and you\'re wearing the best version of the fragrance.
-          </p>
+          <h2>Longevity: how to make it last</h2>
+          <ul>
+            <li>Apply to moisturised skin — fragrance clings to hydration; dry skin burns through scent fast</li>
+            <li>Pulse points only — wrists, neck, behind ears, inner elbows; heat projects the scent</li>
+            <li>Don't reapply mid-evening — you'll over-apply and kill the subtlety you built</li>
+            <li>Fragrance on hair lasts longest of all — one very light spray on a brush, then run through hair</li>
+          </ul>
 
           <div className="cta-block">
-            <p className="text-sm font-semibold mb-1" style={{ color: GOLD }}>Plan Tonight\'s Stack</p>
-            <p className="text-sm text-muted-foreground mb-4">Add your bottles to ScentStack and get occasion-specific recommendations from your own wardrobe — scored by compatibility.</p>
-            <Link href="/signup"><button className="btn-gold px-6 py-2.5 text-sm">Build My Wardrobe Free</button></Link>
+            <p className="text-sm font-semibold mb-1" style={{ color: R_DEEP }}>Build your date night stack</p>
+            <p className="text-sm mb-4" style={{ color: MUTED }}>Add your bottles to Your Scents and get occasion-specific stack recommendations scored by compatibility, projection, and longevity.</p>
+            <Link href="/signup"><button className="btn-gold px-6 py-2.5 text-sm">Start Free ✨</button></Link>
           </div>
-
         </div>
       </main>
 
-      <footer className="border-t border-border py-10 px-6" style={{ background: 'hsl(220 18% 5%)' }}>
+      <footer className="border-t py-10 px-6" style={{ background: 'hsl(18 40% 93%)', borderColor: R_BORDER }}>
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} ScentStack</p>
-          <Link href="/blog" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to guides</Link>
+          <Image src="/logo.png" alt="Your Scents" width={90} height={36} className="h-8 w-auto object-contain" />
+          <Link href="/blog" className="text-xs hover:text-foreground transition-colors" style={{ color: MUTED }}>← Back to guides</Link>
         </div>
       </footer>
     </div>

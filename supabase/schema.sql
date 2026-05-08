@@ -19,6 +19,8 @@ create table if not exists public.wardrobe_items (
   notes text[] default '{}',
   accords text[] default '{}',
   image_url text,
+  rating int default 0,
+  personal_note text,
   created_at timestamptz default now()
 );
 
@@ -30,6 +32,13 @@ create table if not exists public.saved_stacks (
   occasion text,
   confidence text,
   notes jsonb,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.email_signups (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  source text default 'homepage',
   created_at timestamptz default now()
 );
 
@@ -54,6 +63,7 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.wardrobe_items enable row level security;
 alter table public.saved_stacks enable row level security;
+alter table public.email_signups enable row level security;
 
 drop policy if exists "Users can manage their own profile" on public.profiles;
 create policy "Users can manage their own profile"
@@ -66,6 +76,10 @@ create policy "Users can manage their own wardrobe"
 drop policy if exists "Users can manage their own stacks" on public.saved_stacks;
 create policy "Users can manage their own stacks"
   on public.saved_stacks for all using (auth.uid() = user_id);
+
+drop policy if exists "no public access" on public.email_signups;
+create policy "no public access"
+  on public.email_signups for all using (false);
 
 create index if not exists wardrobe_items_user_id_idx on public.wardrobe_items(user_id);
 create index if not exists saved_stacks_user_id_idx on public.saved_stacks(user_id);
