@@ -2,6 +2,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, Sparkles, Check } from 'lucide-react'
+import NoteOverlap from './NoteOverlap'
+
+const ROSE = 'hsl(340 55% 62%)'
+const ROSE_LIGHT = 'hsl(340 45% 92%)'
 
 interface Props {
   wardrobe: any[]
@@ -14,7 +18,11 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
   const [result, setResult] = useState<any | null>(null)
 
   const toggle = (id: string) => {
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : prev.length < 4 ? [...prev, id] : prev
+    )
   }
 
   const handleAnalyze = async () => {
@@ -30,11 +38,13 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
     setLoading(false)
   }
 
+  const selectedItems = wardrobe.filter(w => selected.includes(w.id))
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-2">Stack Builder</h1>
-        <p className="text-muted-foreground mb-8">Select 2–4 fragrances from your wardrobe to analyze as a stack.</p>
+        <h1 className="text-2xl font-bold serif mb-1">Stack Builder 🌸</h1>
+        <p className="text-muted-foreground text-sm mb-8">Select 2–4 fragrances to analyze as a layering stack.</p>
 
         {wardrobe.length === 0 ? (
           <p className="text-muted-foreground text-center py-20">Your wardrobe is empty. Add fragrances from the dashboard.</p>
@@ -44,17 +54,25 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
               <button
                 key={item.id}
                 onClick={() => toggle(item.id)}
+                disabled={!selected.includes(item.id) && selected.length >= 4}
                 className={`p-4 rounded-2xl border text-left transition-all ${
-                  selected.includes(item.id) ? 'border-primary bg-accent shadow-sm' : 'bg-white hover:border-primary/40'
-                }`}
+                  selected.includes(item.id) ? 'shadow-sm' : 'bg-card hover:border-primary/40'
+                } disabled:opacity-40`}
+                style={selected.includes(item.id) ? { borderColor: ROSE, background: ROSE_LIGHT } : {}}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-sm">{item.fragrance_name}</p>
-                    <p className="text-xs text-muted-foreground">{item.brand}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    {item.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.image_url} alt={item.fragrance_name} className="w-10 h-10 object-contain flex-shrink-0 rounded-lg" />
+                    )}
+                    <div>
+                      <p className="font-semibold text-sm serif">{item.fragrance_name}</p>
+                      <p className="text-xs text-muted-foreground">{item.brand}</p>
+                    </div>
                   </div>
                   {selected.includes(item.id) && (
-                    <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: ROSE }}>
                       <Check className="h-3 w-3 text-white" />
                     </div>
                   )}
@@ -62,7 +80,7 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
                 {item.accords?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {item.accords.slice(0, 3).map((a: string) => (
-                      <span key={a} className="text-xs bg-muted px-1.5 py-0.5 rounded-full capitalize">{a}</span>
+                      <span key={a} className="text-[10px] px-1.5 py-0.5 rounded-full capitalize bg-muted text-muted-foreground">{a}</span>
                     ))}
                   </div>
                 )}
@@ -71,15 +89,28 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
           </div>
         )}
 
-        <Button onClick={handleAnalyze} disabled={selected.length < 2 || loading} className="gap-2 mb-8">
+        {/* Note Overlap — show when exactly 2 selected */}
+        {selected.length === 2 && (
+          <div className="bg-card border border-border rounded-2xl p-5 mb-6">
+            <h3 className="font-semibold serif text-sm mb-3">🔬 Note Overlap Analysis</h3>
+            <NoteOverlap items={selectedItems} />
+          </div>
+        )}
+
+        <Button
+          onClick={handleAnalyze}
+          disabled={selected.length < 2 || loading}
+          className="gap-2 mb-8 rounded-full px-6"
+          style={{ background: ROSE, color: '#fff' }}
+        >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           Analyze Stack ({selected.length} selected)
         </Button>
 
         {result && (
-          <div className="bg-white rounded-2xl border p-6 space-y-6">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold">{result.stackName}</h2>
+          <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-xl font-bold serif">{result.stackName}</h2>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 result.confidence === 'high' ? 'bg-green-100 text-green-700' :
                 result.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
@@ -95,22 +126,10 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
                     <span className="text-sm">{o.occasion}</span>
                     <div className="flex items-center gap-2">
                       <div className="w-16 bg-muted rounded-full h-1.5">
-                        <div className="bg-primary h-1.5 rounded-full" style={{ width: `${o.score}%` }} />
+                        <div className="h-1.5 rounded-full" style={{ width: `${o.score}%`, background: ROSE }} />
                       </div>
                       <span className="text-xs text-muted-foreground w-8">{o.score}%</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3 text-sm">Note Profile</h3>
-              <div className="flex flex-wrap gap-2">
-                {result.noteBreakdown?.map((n: any) => (
-                  <div key={n.family} className="bg-accent rounded-xl px-3 py-2">
-                    <p className="text-xs font-medium text-accent-foreground capitalize">{n.family}</p>
-                    <p className="text-xs text-muted-foreground">{n.notes.slice(0, 3).join(', ')}</p>
                   </div>
                 ))}
               </div>
@@ -121,7 +140,7 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
               <ol className="space-y-2">
                 {result.applicationOrder?.map((name: string, i: number) => (
                   <li key={name} className="flex items-center gap-3 text-sm">
-                    <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                    <span className="w-6 h-6 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: ROSE }}>{i + 1}</span>
                     {name}
                   </li>
                 ))}
@@ -133,7 +152,7 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
               <ul className="space-y-2">
                 {result.layeringAdvice?.map((tip: string, i: number) => (
                   <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                    <span className="text-primary">→</span>{tip}
+                    <span style={{ color: ROSE }}>→</span>{tip}
                   </li>
                 ))}
               </ul>
