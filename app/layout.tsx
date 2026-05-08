@@ -1,31 +1,35 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 
-const inter = Inter({
-  subsets: ['latin']
-})
-
 export const metadata: Metadata = {
-  title: 'Your Scents — Your Fragrance Wardrobe Manager',
-  description: 'Catalog your fragrance collection, discover the best occasions for each scent, and create incredible layering combinations with real perfume data from 70,000+ fragrances.',
-  keywords: ['fragrance', 'perfume', 'scent layering', 'cologne', 'perfume app'],
+  title: 'ScentStack — Build Your Fragrance Wardrobe',
+  description:
+    'Catalog your fragrance collection, discover optimal wear occasions for each scent, and find the best layering combinations using real note data from 70,000+ perfumes and colognes.',
+  keywords: [
+    'fragrance wardrobe',
+    'perfume collection tracker',
+    'scent layering',
+    'cologne app',
+    'fragrance notes',
+    'perfume combinations',
+  ],
   openGraph: {
-    title: 'Your Scents — Layer Your Fragrances Like a Pro',
-    description: 'Discover the best occasions and layering combos for your fragrance wardrobe.',
+    title: 'ScentStack — Layer Your Fragrances Like a Pro',
+    description:
+      'Discover the best occasions and layering combos for every fragrance you own. Backed by real top, middle, and base note data.',
     type: 'website',
   },
 }
 
 export default function RootLayout({
-  children
+  children,
 }: {
   children: React.ReactNode
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         {children}
         <Toaster />
       </body>

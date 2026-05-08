@@ -2,51 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-color: 240 10% 3.9%;
-    --primary: 315 60% 55%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 315 40% 95%;
-    --accent-foreground: 315 60% 40%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 315 60% 55%;
-    --radius: 0.75rem;
+    /* Warm ivory & deep ink palette */
+    --background: 38 30% 97%;
+    --foreground: 24 15% 10%;
+    --card: 38 25% 95%;
+    --card-foreground: 24 15% 10%;
+    --popover: 38 30% 97%;
+    --popover-foreground: 24 15% 10%;
+
+    /* Dusty rose / old-gold primary */
+    --primary: 340 28% 42%;
+    --primary-foreground: 38 30% 97%;
+
+    --secondary: 38 20% 90%;
+    --secondary-foreground: 24 15% 20%;
+
+    --muted: 38 15% 92%;
+    --muted-foreground: 24 10% 50%;
+
+    --accent: 35 45% 88%;
+    --accent-foreground: 24 15% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 38 30% 97%;
+
+    --border: 35 20% 85%;
+    --input: 35 20% 85%;
+    --ring: 340 28% 42%;
+    --radius: 0.25rem;
+
+    /* Custom design tokens */
+    --gold: 38 55% 60%;
+    --ink: 24 15% 8%;
+    --parchment: 40 35% 94%;
+    --dusty-rose: 340 25% 68%;
   }
+
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --primary: 315 60% 65%;
-    --primary-foreground: 240 10% 3.9%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 315 30% 15%;
-    --accent-foreground: 315 60% 75%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 315 60% 65%;
+    --background: 24 12% 7%;
+    --foreground: 38 25% 92%;
+    --card: 24 12% 10%;
+    --card-foreground: 38 25% 92%;
+    --primary: 340 28% 65%;
+    --primary-foreground: 24 12% 7%;
+    --secondary: 24 10% 14%;
+    --secondary-foreground: 38 25% 85%;
+    --muted: 24 10% 14%;
+    --muted-foreground: 38 12% 55%;
+    --accent: 35 20% 16%;
+    --accent-foreground: 38 25% 92%;
+    --border: 24 8% 18%;
+    --input: 24 8% 18%;
+    --ring: 340 28% 65%;
   }
 }
 
 @layer base {
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  h1, h2, h3, .serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  ::selection {
+    background: hsl(340 28% 42% / 0.15);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gold-line {
+    background: linear-gradient(90deg, transparent, hsl(var(--gold)), transparent);
+    height: 1px;
+    width: 100%;
+  }
+
+  .editorial-cap {
+    font-variant: small-caps;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
 }
