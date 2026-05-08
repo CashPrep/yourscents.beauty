@@ -273,8 +273,8 @@ export default function HomePage() {
                   period: 'forever',
                   description: 'For the casual collector 🌸',
                   features: [
-                    'Up to 10 fragrances',
-                    'Personal scent inventory (up to 10 bottles) 🧴',
+                    'Up to 3 fragrances',
+                    'Personal scent inventory (up to 3 bottles) 🧴',
                     '3 layering combos/day',
                     'Basic occasion matching',
                     '70,000+ fragrance search',
