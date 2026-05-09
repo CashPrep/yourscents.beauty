@@ -11,9 +11,9 @@ export default function NoteOverlap({ items }: { items: any[] }) {
     const b = items[1]
     const notesA = new Set((a.notes || []).map((n: string) => n.toLowerCase()))
     const notesB = new Set((b.notes || []).map((n: string) => n.toLowerCase()))
-    const shared = [...notesA].filter(n => notesB.has(n))
-    const uniqueA = [...notesA].filter(n => !notesB.has(n))
-    const uniqueB = [...notesB].filter(n => !notesA.has(n))
+    const shared = [...notesA].filter(n => notesB.has(n)) as string[]
+    const uniqueA = [...notesA].filter(n => !notesB.has(n)) as string[]
+    const uniqueB = [...notesB].filter(n => !notesA.has(n)) as string[]
     return { shared, uniqueA, uniqueB, a, b }
   }, [items])
 
