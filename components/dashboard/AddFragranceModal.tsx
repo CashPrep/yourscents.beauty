@@ -11,26 +11,29 @@ interface Props {
   wardrobe?: any[]
 }
 
-const ROSE       = 'hsl(340 55% 62%)'
-const ROSE_LIGHT = 'hsl(340 45% 92%)'
-const GOLD       = 'hsl(42 85% 68%)'
-const GOLD_BG    = 'hsl(42 85% 68% / 0.10)'
-const GOLD_BORDER= 'hsl(42 85% 68% / 0.25)'
+const ROSE        = 'hsl(340 55% 62%)'
+const ROSE_LIGHT  = 'hsl(340 45% 92%)'   // was missing — caused ReferenceError in expanded card
+const ROSE_TEXT   = 'hsl(340 55% 48%)'
+const GOLD        = 'hsl(42 85% 68%)'
+const GOLD_BG     = 'hsl(42 85% 68% / 0.10)'
+const GOLD_BORDER = 'hsl(42 85% 68% / 0.25)'
 
-function blindBuyScore(candidate: any, wardrobe: any[]): { score: number; label: string; color: string; bg: string; icon: 'safe' | 'caution' | 'risk'; reason: string } {
+function blindBuyScore(
+  candidate: any,
+  wardrobe: any[],
+): { score: number; label: string; color: string; bg: string; icon: 'safe' | 'caution' | 'risk'; reason: string } {
   if (!wardrobe || wardrobe.length === 0) {
     return { score: 72, label: 'No Data', color: GOLD, bg: GOLD_BG, icon: 'caution', reason: 'Add fragrances to your wardrobe for a personalised score.' }
   }
 
   const candidateAccords = [
     ...(candidate.accords || []),
-    ...(candidate.notes?.top || []),
+    ...(candidate.notes?.top    || []),
     ...(candidate.notes?.middle || []),
-    ...(candidate.notes?.base || []),
+    ...(candidate.notes?.base   || []),
   ].map((n: string) => n.toLowerCase())
 
-  // Collect all accords/notes user already likes (rated 4+) vs dislikes (rated 1-2)
-  const likedAccords: string[] = []
+  const likedAccords: string[]    = []
   const dislikedAccords: string[] = []
   wardrobe.forEach((item: any) => {
     const itemAccords = [...(item.accords || []), ...(item.notes || [])].map((a: string) => a.toLowerCase())
@@ -40,11 +43,9 @@ function blindBuyScore(candidate: any, wardrobe: any[]): { score: number; label:
 
   const likedSet    = new Set(likedAccords)
   const dislikedSet = new Set(dislikedAccords)
-
   const likedHits    = candidateAccords.filter(a => likedSet.has(a)).length
   const dislikedHits = candidateAccords.filter(a => dislikedSet.has(a)).length
 
-  // Diversity bonus: does this add new accords to the collection?
   const allWardrobeAccords = new Set(
     wardrobe.flatMap((i: any) => [...(i.accords || []), ...(i.notes || [])].map((a: string) => a.toLowerCase()))
   )
@@ -61,7 +62,7 @@ function blindBuyScore(candidate: any, wardrobe: any[]): { score: number; label:
     const reason = likedHits > 0
       ? `Shares ${likedHits} accord${likedHits > 1 ? 's' : ''} with fragrances you love.${novelAccords > 0 ? ` Also adds ${novelAccords} new note family.` : ''}`
       : `Complements your collection well${novelAccords > 0 ? ` and adds ${novelAccords} fresh accord${novelAccords > 1 ? 's' : ''}` : ''}.`
-    return { score, label: 'Safe Buy', color: 'hsl(142 70% 55%)', bg: 'hsl(142 70% 55% / 0.08)', icon: 'safe', reason }
+    return { score, label: 'Safe Buy', color: 'hsl(142 70% 45%)', bg: 'hsl(142 70% 55% / 0.08)', icon: 'safe', reason }
   }
   if (score >= 55) {
     const reason = dislikedHits > 0
@@ -70,17 +71,17 @@ function blindBuyScore(candidate: any, wardrobe: any[]): { score: number; label:
     return { score, label: 'Sample First', color: GOLD, bg: GOLD_BG, icon: 'caution', reason }
   }
   const reason = dislikedHits > 0
-    ? `Heavy overlap with accords from your lower-rated bottles. High blind buy risk.`
+    ? 'Heavy overlap with accords from your lower-rated bottles. High blind buy risk.'
     : 'Very different from anything in your wardrobe — could be a miss.'
-  return { score, label: 'High Risk', color: 'hsl(0 65% 60%)', bg: 'hsl(0 65% 60% / 0.08)', icon: 'risk', reason }
+  return { score, label: 'High Risk', color: 'hsl(0 65% 55%)', bg: 'hsl(0 65% 60% / 0.08)', icon: 'risk', reason }
 }
 
 export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Props) {
   const { toast } = useToast()
-  const [query, setQuery]     = useState('')
-  const [results, setResults] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [adding, setAdding]   = useState<string | null>(null)
+  const [query,    setQuery]    = useState('')
+  const [results,  setResults]  = useState<any[]>([])
+  const [loading,  setLoading]  = useState(false)
+  const [adding,   setAdding]   = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
@@ -100,47 +101,47 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
   const handleAdd = async (fragrance: any) => {
     setAdding(fragrance.id)
     try {
-      let fullFragrance = fragrance
+      // Try to enrich with full detail (extra notes from Fragella/RapidAPI).
+      // Falls back to search result data gracefully if 404 or network error.
+      let full = { ...fragrance }
       try {
-        const detailRes = await fetch(`/api/fragrances/${fragrance.id}`)
+        const detailRes = await fetch(`/api/fragrances/${encodeURIComponent(fragrance.id)}`)
         if (detailRes.ok) {
           const detail = await detailRes.json()
-          fullFragrance = { ...fragrance, ...detail }
-          if (!fullFragrance.image_url) fullFragrance.image_url = fragrance.image_url
+          full = { ...full, ...detail }
+          // Preserve search-result image if detail has none
+          if (!full.image_url) full.image_url = fragrance.image_url
         }
       } catch { /* keep search result data */ }
 
-      const topNotes    = fullFragrance.notes?.top    || fullFragrance.top_notes    || []
-      const middleNotes = fullFragrance.notes?.middle || fullFragrance.notes?.heart || fullFragrance.heart_notes || fullFragrance.middle_notes || []
-      const baseNotes   = fullFragrance.notes?.base   || fullFragrance.base_notes   || []
+      // Normalise notes into a { top, middle, base } object — what the API expects.
+      const topNotes    = (full.notes?.top    || full.top_notes    || []).map((n: any) => typeof n === 'string' ? n : n.name).filter(Boolean)
+      const middleNotes = (full.notes?.middle || full.notes?.heart || full.heart_notes || full.middle_notes || []).map((n: any) => typeof n === 'string' ? n : n.name).filter(Boolean)
+      const baseNotes   = (full.notes?.base   || full.base_notes   || []).map((n: any) => typeof n === 'string' ? n : n.name).filter(Boolean)
 
-      const allNotes = [
-        ...topNotes.map((n: any)    => (typeof n === 'string' ? n : n.name)),
-        ...middleNotes.map((n: any) => (typeof n === 'string' ? n : n.name)),
-        ...baseNotes.map((n: any)   => (typeof n === 'string' ? n : n.name)),
-      ].filter(Boolean)
-
-      const res  = await fetch('/api/wardrobe', {
+      const res = await fetch('/api/wardrobe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          fragrance_id:     fullFragrance.id,
-          fragrance_name:   fullFragrance.name,
-          brand:            fullFragrance.brand,
-          notes:            allNotes,
-          notes_structured: {
-            top:    topNotes.map((n: any)    => typeof n === 'string' ? n : n.name).filter(Boolean),
-            middle: middleNotes.map((n: any) => typeof n === 'string' ? n : n.name).filter(Boolean),
-            base:   baseNotes.map((n: any)   => typeof n === 'string' ? n : n.name).filter(Boolean),
-          },
-          accords:   fullFragrance.accords || [],
-          image_url: fullFragrance.image_url || null,
+          fragrance_id:   full.id,
+          fragrance_name: full.name,
+          brand:          full.brand,
+          // Send as structured object — the API's sanitizeStringArray handles each tier.
+          notes: { top: topNotes, middle: middleNotes, base: baseNotes },
+          accords:   full.accords   || [],
+          image_url: full.image_url || null,
         }),
       })
+
       const data = await res.json()
       if (res.ok) {
+        const totalNotes = topNotes.length + middleNotes.length + baseNotes.length
         onAdd(data)
-        toast({ title: 'Added to wardrobe! 🌸', description: `${fullFragrance.name} by ${fullFragrance.brand}${allNotes.length ? ` — ${allNotes.length} notes loaded` : ''}` })
+        toast({
+          title: 'Added to wardrobe! 🌸',
+          description: `${full.name} by ${full.brand}${totalNotes ? ` — ${totalNotes} notes loaded` : ''}`,
+        })
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
@@ -159,7 +160,9 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
           <div>
             <h2 className="font-semibold text-base">Add Fragrance 🌸</h2>
             {wardrobe.length > 0 && (
-              <p className="text-[11px] text-muted-foreground mt-0.5">Blind Buy Risk Score based on your {wardrobe.length} bottle{wardrobe.length !== 1 ? 's' : ''}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Blind Buy Risk Score based on your {wardrobe.length} bottle{wardrobe.length !== 1 ? 's' : ''}
+              </p>
             )}
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg">
@@ -167,7 +170,7 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
           </button>
         </div>
 
-        {/* Search input */}
+        {/* Search */}
         <div className="p-4 border-b border-border">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -200,13 +203,13 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
           )}
 
           {results.map((frag: any) => {
-            const risk  = blindBuyScore(frag, wardrobe)
-            const isExp = expanded === frag.id
+            const risk    = blindBuyScore(frag, wardrobe)
+            const isExp   = expanded === frag.id
             const RiskIcon = risk.icon === 'safe' ? ShieldCheck : risk.icon === 'caution' ? ShieldAlert : ShieldX
             return (
               <div key={frag.id} className="rounded-xl border border-transparent hover:border-border transition-all overflow-hidden">
                 <div className="flex items-center gap-3 p-3 hover:bg-muted/40">
-                  {/* Image */}
+                  {/* Bottle image */}
                   <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-border bg-muted/30">
                     {frag.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -225,12 +228,10 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
                     )}
                   </div>
 
-                  {/* Info */}
+                  {/* Name + score pill */}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{frag.name}</p>
                     <p className="text-xs text-muted-foreground mb-1.5">{frag.brand}</p>
-
-                    {/* Blind Buy Score pill */}
                     <button
                       onClick={() => setExpanded(isExp ? null : frag.id)}
                       className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
@@ -258,13 +259,22 @@ export default function AddFragranceModal({ onClose, onAdd, wardrobe = [] }: Pro
 
                 {/* Expanded risk explanation */}
                 {isExp && (
-                  <div className="mx-3 mb-3 px-3 py-2.5 rounded-xl text-[11px] leading-relaxed" style={{ background: risk.bg, color: risk.color, border: `1px solid ${risk.color}25` }}>
+                  <div
+                    className="mx-3 mb-3 px-3 py-2.5 rounded-xl text-[11px] leading-relaxed"
+                    style={{ background: risk.bg, color: risk.color, border: `1px solid ${risk.color}25` }}
+                  >
                     <p className="font-semibold mb-0.5">🔍 Why this score?</p>
-                    <p className="text-[11px] opacity-90">{risk.reason}</p>
+                    <p className="opacity-90">{risk.reason}</p>
                     {(frag.notes?.top?.length > 0 || frag.notes?.middle?.length > 0) && (
                       <div className="flex gap-1 flex-wrap mt-2">
                         {[...(frag.notes?.top || []), ...(frag.notes?.middle || [])].slice(0, 4).map((n: string) => (
-                          <span key={n} className="px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: ROSE_LIGHT, color: ROSE }}>{n}</span>
+                          <span
+                            key={n}
+                            className="px-1.5 py-0.5 rounded-full text-[10px]"
+                            style={{ background: ROSE_LIGHT, color: ROSE_TEXT }}
+                          >
+                            {n}
+                          </span>
                         ))}
                       </div>
                     )}
