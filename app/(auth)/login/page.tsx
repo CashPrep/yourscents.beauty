@@ -2,31 +2,44 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Respect ?next= so protected pages can redirect back after login
+  const next = searchParams.get('next') || '/dashboard'
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (signInError) {
+      setError(signInError.message)
       setLoading(false)
-    } else {
-      router.push('/dashboard')
+      return
     }
+
+    // router.refresh() tells Next.js to re-run server components with the new
+    // session cookie before we navigate. Without this, the dashboard server
+    // component calls getUser() before the cookie is set and redirects back
+    // to /login — creating an infinite loop for some users.
+    router.refresh()
+    router.push(next)
   }
 
   return (
@@ -51,7 +64,7 @@ export default function LoginPage() {
       </div>
 
       <div className="panel-glow relative w-full max-w-sm p-8">
-        {/* Logo — cream background blends with logo palette */}
+        {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -106,6 +119,16 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        <div className="mt-4 text-center">
+          <Link
+            href="/forgot-password"
+            className="text-xs hover:underline"
+            style={{ color: 'hsl(8 48% 72%)' }}
+          >
+            Forgot your password?
+          </Link>
+        </div>
+
         <div className="rule my-5" />
 
         <p className="text-center text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
@@ -123,5 +146,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
