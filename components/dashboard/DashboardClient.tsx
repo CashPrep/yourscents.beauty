@@ -1,11 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp, Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
+import {
+  Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp,
+  Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight, PartyPopper,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import AddFragranceModal from './AddFragranceModal'
 import WardrobeCard from './WardrobeCard'
 import OccasionPlanner from './OccasionPlanner'
@@ -31,6 +34,7 @@ interface Props {
   user: any
   wardrobe: any[]
   profile: any
+  justUpgraded?: boolean
 }
 
 type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna' | 'mood' | 'seasonal'
@@ -44,10 +48,12 @@ const SORT_OPTIONS = [
 
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
-// ── Shared upgrade helper ────────────────────────────────────────
-// Uses POST (not GET) so the session cookie is always sent with the request.
-// This is the same pattern used in the signup flow (Step 4).
-async function startCheckout(plan: 'pro' | 'collector', setLoading: (v: boolean) => void, setError: (v: string) => void) {
+// ── POST checkout helper ────────────────────────────────────────
+async function startCheckout(
+  plan: 'pro' | 'collector',
+  setLoading: (v: boolean) => void,
+  setError: (v: string) => void,
+) {
   setLoading(true)
   setError('')
   try {
@@ -69,6 +75,44 @@ async function startCheckout(plan: 'pro' | 'collector', setLoading: (v: boolean)
     setError(msg)
     setLoading(false)
   }
+}
+
+// ── Upgrade success banner ───────────────────────────────────────
+function UpgradedBanner({ plan, onDismiss }: { plan: string; onDismiss: () => void }) {
+  return (
+    <div
+      className="rounded-2xl p-5 flex items-center justify-between gap-4 mb-6"
+      style={{
+        background: `linear-gradient(135deg, hsl(8 56% 76% / 0.14), hsl(8 56% 76% / 0.24))`,
+        border: `1.5px solid ${ROSE_BORDER}`,
+        boxShadow: `0 4px 24px hsl(8 56% 76% / 0.14)`,
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: ROSE_BG, border: `1px solid ${ROSE_BORDER}` }}
+        >
+          <PartyPopper className="h-5 w-5" style={{ color: ROSE_DEEP }} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold" style={{ color: FOREGROUND }}>
+            Welcome to {plan.charAt(0).toUpperCase() + plan.slice(1)}! 🌸
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+            Your wardrobe is now unlimited. Start adding more fragrances!
+          </p>
+        </div>
+      </div>
+      <button
+        onClick={onDismiss}
+        className="text-xs shrink-0 px-3 py-1.5 rounded-full transition-colors"
+        style={{ color: MUTED, border: `1px solid ${ROSE_BORDER}` }}
+      >
+        Dismiss
+      </button>
+    </div>
+  )
 }
 
 // ── Free plan upgrade gate banner ─────────────────────────────────
@@ -96,12 +140,10 @@ function FreePlanGate() {
             You&apos;ve reached the 3-fragrance limit
           </p>
           <p className="text-xs leading-relaxed" style={{ color: MUTED }}>
-            Free plan includes up to {FREE_LIMIT} fragrances. Upgrade to Pro for an unlimited wardrobe,
-            full stack scoring, and shareable scent cards.
+            Free plan includes up to {FREE_LIMIT} fragrances. Upgrade to Pro for an unlimited
+            wardrobe, full stack scoring, and shareable scent cards.
           </p>
-          {error && (
-            <p className="text-xs mt-2 text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs mt-2 text-destructive">{error}</p>}
         </div>
       </div>
       <button
@@ -109,7 +151,9 @@ function FreePlanGate() {
         disabled={loading}
         className="btn-gold shrink-0 flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap"
       >
-        {loading ? 'Opening checkout…' : <><span>Upgrade to Pro</span><ArrowRight className="h-3 w-3" /></>}
+        {loading
+          ? 'Opening checkout…'
+          : <><span>Upgrade to Pro</span><ArrowRight className="h-3 w-3" /></>}
       </button>
     </div>
   )
@@ -129,10 +173,7 @@ function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: bo
       }}
     >
       <div className="flex items-start gap-3">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: ROSE_BG }}
-        >
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: ROSE_BG }}>
           <Share2 className="h-4 w-4" style={{ color: ROSE }} />
         </div>
         <div>
@@ -165,19 +206,39 @@ function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: bo
   )
 }
 
-export default function DashboardClient({ user, wardrobe: initialWardrobe, profile }: Props) {
-  const router = useRouter()
+export default function DashboardClient({ user, wardrobe: initialWardrobe, profile, justUpgraded = false }: Props) {
+  const router   = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
-  const [wardrobe, setWardrobe]           = useState(initialWardrobe)
-  const [showAddModal, setShowAddModal]   = useState(false)
-  const [activeTab, setActiveTab]         = useState<Tab>('wardrobe')
-  const [sort, setSort]                   = useState('recent')
-  const [accordFilter, setAccordFilter]   = useState('all')
-  const [copied, setCopied]               = useState(false)
-  const [addBlocked, setAddBlocked]       = useState(false)
-  const [upgradeLoading, setUpgradeLoading] = useState(false)
-  const [upgradeError,   setUpgradeError]   = useState('')
-  const plan   = profile?.plan || 'free'
+
+  const [wardrobe, setWardrobe]               = useState(initialWardrobe)
+  const [showAddModal, setShowAddModal]        = useState(false)
+  const [activeTab, setActiveTab]              = useState<Tab>('wardrobe')
+  const [sort, setSort]                        = useState('recent')
+  const [accordFilter, setAccordFilter]        = useState('all')
+  const [copied, setCopied]                    = useState(false)
+  const [addBlocked, setAddBlocked]            = useState(false)
+  const [upgradeLoading, setUpgradeLoading]    = useState(false)
+  const [upgradeError,   setUpgradeError]      = useState('')
+  // Optimistic plan — if Stripe webhook fires before next page load this will
+  // already be correct from DB. If not, we show optimistic 'pro' until refresh.
+  const [optimisticPlan, setOptimisticPlan]    = useState<string | null>(null)
+  const [showUpgradedBanner, setShowUpgradedBanner] = useState(justUpgraded)
+
+  // When returning from Stripe with ?upgraded=true, clean the URL and set
+  // an optimistic plan so the UI immediately reflects the new state even if
+  // the webhook hasn't written to the DB yet.
+  useEffect(() => {
+    if (justUpgraded) {
+      setOptimisticPlan('pro')
+      // Remove ?upgraded=true from URL without full navigation
+      const url = new URL(window.location.href)
+      url.searchParams.delete('upgraded')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [justUpgraded])
+
+  const plan   = optimisticPlan ?? (profile?.plan || 'free')
   const isFree = plan === 'free'
   const atLimit = isFree && wardrobe.length >= FREE_LIMIT
 
@@ -198,13 +259,19 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const handleRemove = async (id: string) => {
-    await fetch('/api/wardrobe', { method: 'DELETE', body: JSON.stringify({ id }), headers: { 'Content-Type': 'application/json' } })
+    await fetch('/api/wardrobe', {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+      headers: { 'Content-Type': 'application/json' },
+    })
     setWardrobe((prev: any[]) => prev.filter((i: any) => i.id !== id))
     setAddBlocked(false)
   }
 
   const handleRatingUpdate = (id: string, rating: number, note: string) => {
-    setWardrobe((prev: any[]) => prev.map((i: any) => i.id === id ? { ...i, rating, personal_note: note } : i))
+    setWardrobe((prev: any[]) => prev.map((i: any) =>
+      i.id === id ? { ...i, rating, personal_note: note } : i,
+    ))
   }
 
   const handleShare = () => {
@@ -215,7 +282,10 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const displayWardrobe = [...wardrobe]
-    .filter((item: any) => accordFilter === 'all' || (item.accords || []).some((a: string) => a.toLowerCase().includes(accordFilter)))
+    .filter((item: any) =>
+      accordFilter === 'all' ||
+      (item.accords || []).some((a: string) => a.toLowerCase().includes(accordFilter)),
+    )
     .sort((a: any, b: any) => {
       if (sort === 'name')   return a.fragrance_name.localeCompare(b.fragrance_name)
       if (sort === 'brand')  return a.brand.localeCompare(b.brand)
@@ -234,7 +304,10 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   ]
 
   const avgRating = wardrobe.filter((i: any) => i.rating).length
-    ? (wardrobe.filter((i: any) => i.rating).reduce((s: number, i: any) => s + (i.rating || 0), 0) / wardrobe.filter((i: any) => i.rating).length).toFixed(1)
+    ? (
+        wardrobe.filter((i: any) => i.rating).reduce((s: number, i: any) => s + (i.rating || 0), 0) /
+        wardrobe.filter((i: any) => i.rating).length
+      ).toFixed(1)
     : null
 
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1)
@@ -296,6 +369,14 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
+
+        {/* ── Post-checkout success banner ── */}
+        {showUpgradedBanner && (
+          <UpgradedBanner
+            plan={plan}
+            onDismiss={() => setShowUpgradedBanner(false)}
+          />
+        )}
 
         {wardrobe.length > 0 && (
           <ScentCardPanel userId={user.id} copied={copied} onCopy={handleShare} />
