@@ -8,6 +8,15 @@ const supabase = createSupabase(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Map a Stripe subscription object to the plan name stored in profiles.
+// Matches the price IDs set in STRIPE_PRO_PRICE_ID / STRIPE_COLLECTOR_PRICE_ID.
+function planFromSubscription(sub: Stripe.Subscription): string {
+  const priceId = sub.items?.data?.[0]?.price?.id
+  if (priceId === process.env.STRIPE_COLLECTOR_PRICE_ID) return 'collector'
+  if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro'
+  return 'free'
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature')!
@@ -17,6 +26,8 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
+
+  // ── New subscription created via Checkout ─────────────────────────────────
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.CheckoutSession
     const userId = session.metadata?.user_id
@@ -29,9 +40,25 @@ export async function POST(request: NextRequest) {
       }).eq('id', userId)
     }
   }
+
+  // ── Plan changed (upgrade / downgrade / reactivation) ─────────────────────
+  if (event.type === 'customer.subscription.updated') {
+    const sub = event.data.object as Stripe.Subscription
+    const newPlan = planFromSubscription(sub)
+    await supabase
+      .from('profiles')
+      .update({ plan: newPlan })
+      .eq('stripe_subscription_id', sub.id)
+  }
+
+  // ── Subscription cancelled / expired ─────────────────────────────────────
   if (event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription
-    await supabase.from('profiles').update({ plan: 'free', stripe_subscription_id: null }).eq('stripe_subscription_id', sub.id)
+    await supabase
+      .from('profiles')
+      .update({ plan: 'free', stripe_subscription_id: null })
+      .eq('stripe_subscription_id', sub.id)
   }
+
   return NextResponse.json({ received: true })
 }
