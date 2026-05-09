@@ -20,15 +20,14 @@ async function startCheckout(plan: 'pro' | 'collector', setLoading: (v: boolean)
       body: JSON.stringify({ plan }),
     })
     if (res.status === 401) {
-      // Not logged in — send to signup with plan pre-selected
       window.location.href = `/signup?plan=${plan}`
       return
     }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || `Checkout error (${res.status})`)
+      throw new Error((body as { error?: string }).error || `Checkout error (${res.status})`)
     }
-    const { url } = await res.json()
+    const { url } = await res.json() as { url: string }
     if (!url) throw new Error('No checkout URL returned')
     window.location.href = url
   } catch (err: unknown) {
@@ -58,10 +57,8 @@ const PRO_FEATURES = [
 const COLLECTOR_FEATURES = [
   'Everything in Pro',
   'Advanced layering notes',
-  'Export wardrobe as PDF',
   'Early access to new features',
   'Priority 12-hour support',
-  'Collector badge on scent card',
 ]
 
 function PlanCard({
@@ -142,7 +139,6 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(18 50% 97%)' }}>
 
-      {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
@@ -198,7 +194,6 @@ export default function PricingPage() {
             />
           </div>
 
-          {/* FAQ / trust */}
           <div className="mt-16 max-w-xl mx-auto space-y-5">
             {[
               { q: 'Can I cancel anytime?', a: 'Yes — cancel from your dashboard at any time. You keep access until the end of your billing period, no questions asked.' },

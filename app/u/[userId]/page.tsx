@@ -12,7 +12,6 @@ const CREAM       = 'hsl(18 50% 97%)'
 const FOREGROUND  = 'hsl(5 25% 22%)'
 const MUTED       = 'hsl(8 15% 52%)'
 
-// Service-role client bypasses RLS so any visitor can view a public scent card.
 function adminClient() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,9 +19,18 @@ function adminClient() {
   )
 }
 
+interface WardrobeRow {
+  id: string
+  fragrance_name: string
+  brand: string
+  image_url?: string | null
+  rating?: number
+  personal_note?: string
+  accords?: string[]
+}
+
 type Props = { params: Promise<{ userId: string }> }
 
-// ── Per-page OG metadata ──────────────────────────────────────────────
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { userId } = await params
   const supabase   = adminClient()
@@ -59,9 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-// ── Page ───────────────────────────────────────────────────────────────
 export default async function PublicProfilePage({ params }: Props) {
-  // Next.js 15: params is a Promise — must be awaited before accessing.
   const { userId } = await params
   const supabase   = adminClient()
 
@@ -73,13 +79,14 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const { data: items } = await supabase
     .from('wardrobe_items')
-    .select('*')
+    .select('id, fragrance_name, brand, image_url, rating, personal_note, accords')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (!profile || !items) return notFound()
 
   const name = profile.full_name || 'A Your Scents user'
+  const rows = items as WardrobeRow[]
 
   return (
     <div
@@ -90,13 +97,11 @@ export default async function PublicProfilePage({ params }: Props) {
           'radial-gradient(ellipse 70% 40% at 50% -5%, hsl(8 56% 76% / 0.12) 0%, transparent 65%), radial-gradient(ellipse 50% 30% at 100% 100%, hsl(13 48% 65% / 0.08) 0%, transparent 60%)',
       }}
     >
-      {/* Blush orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(10 60% 84% / 0.28)' }} />
         <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(13 48% 65% / 0.16)' }} />
       </div>
 
-      {/* Nav */}
       <header
         className="fixed top-0 inset-x-0 z-50 border-b"
         style={{ background: 'hsl(18 60% 98% / 0.92)', backdropFilter: 'blur(20px)', borderColor: ROSE_BORDER }}
@@ -119,7 +124,6 @@ export default async function PublicProfilePage({ params }: Props) {
       </header>
 
       <div className="relative max-w-3xl mx-auto px-4 pt-28 pb-16">
-        {/* Profile header */}
         <div className="text-center mb-10">
           <div
             className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold serif"
@@ -131,16 +135,15 @@ export default async function PublicProfilePage({ params }: Props) {
             {name}&apos;s Fragrance Wardrobe
           </h1>
           <p className="text-sm" style={{ color: MUTED }}>
-            ✨ {items.length} fragrance{items.length !== 1 ? 's' : ''} · Curated on Your Scents
+            ✨ {rows.length} fragrance{rows.length !== 1 ? 's' : ''} · Curated on Your Scents
           </p>
         </div>
 
-        {/* Wardrobe grid */}
-        {items.length === 0 ? (
+        {rows.length === 0 ? (
           <p className="text-center py-20" style={{ color: MUTED }}>This wardrobe is empty 🌸</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {items.map((item: any) => (
+            {rows.map((item: WardrobeRow) => (
               <div
                 key={item.id}
                 className="panel-glow flex flex-col gap-2 p-4 rounded-2xl"
@@ -159,17 +162,17 @@ export default async function PublicProfilePage({ params }: Props) {
                 </div>
                 <p className="font-semibold text-sm serif leading-tight" style={{ color: FOREGROUND }}>{item.fragrance_name}</p>
                 <p className="text-xs" style={{ color: MUTED }}>{item.brand}</p>
-                {item.rating > 0 && (
+                {item.rating && item.rating > 0 && (
                   <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(i => (
-                      <span key={i} className="text-xs" style={{ color: i <= item.rating ? ROSE : 'hsl(10 25% 80%)' }}>★</span>
+                      <span key={i} className="text-xs" style={{ color: item.rating && i <= item.rating ? ROSE : 'hsl(10 25% 80%)' }}>★</span>
                     ))}
                   </div>
                 )}
                 {item.personal_note && (
                   <p className="text-[11px] italic line-clamp-2" style={{ color: MUTED }}>&ldquo;{item.personal_note}&rdquo;</p>
                 )}
-                {item.accords?.length > 0 && (
+                {item.accords && item.accords.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {item.accords.slice(0,2).map((a: string) => (
                       <span key={a} className="chip text-[9px] capitalize">{a}</span>
@@ -181,7 +184,6 @@ export default async function PublicProfilePage({ params }: Props) {
           </div>
         )}
 
-        {/* CTA */}
         <div className="text-center mt-12">
           <Link href="/">
             <button className="btn-gold text-sm px-7 py-3">

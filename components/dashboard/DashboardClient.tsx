@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp,
-  Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight, PartyPopper,
+  Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight, PartyPopper, CreditCard,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -80,6 +80,31 @@ async function startCheckout(
     }
     const { url } = await res.json() as { url: string }
     if (!url) throw new Error('No checkout URL returned')
+    window.location.href = url
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Something went wrong'
+    setError(msg)
+    setLoading(false)
+  }
+}
+
+async function openBillingPortal(
+  setLoading: (v: boolean) => void,
+  setError: (v: string) => void,
+) {
+  setLoading(true)
+  setError('')
+  try {
+    const res = await fetch('/api/billing-portal', {
+      method: 'POST',
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error((body as { error?: string }).error || 'Could not open billing portal')
+    }
+    const { url } = await res.json() as { url: string }
+    if (!url) throw new Error('No portal URL returned')
     window.location.href = url
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Something went wrong'
@@ -227,6 +252,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   const [addBlocked, setAddBlocked]                 = useState(false)
   const [upgradeLoading, setUpgradeLoading]         = useState(false)
   const [upgradeError,   setUpgradeError]           = useState('')
+  const [portalLoading,  setPortalLoading]          = useState(false)
+  const [portalError,    setPortalError]            = useState('')
   const [optimisticPlan, setOptimisticPlan]         = useState<string | null>(null)
   const [showUpgradedBanner, setShowUpgradedBanner] = useState(justUpgraded)
 
@@ -339,13 +366,24 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {isFree && (
+            {isFree ? (
               <button
                 onClick={() => startCheckout('pro', setUpgradeLoading, setUpgradeError)}
                 disabled={upgradeLoading}
                 className="btn-gold flex items-center gap-1.5 text-xs px-3 py-1.5"
               >
                 {upgradeLoading ? 'Opening…' : '✨ Upgrade'}
+              </button>
+            ) : (
+              <button
+                onClick={() => openBillingPortal(setPortalLoading, setPortalError)}
+                disabled={portalLoading}
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
+                style={{ background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}` }}
+                title="Manage or cancel your subscription"
+              >
+                <CreditCard className="h-3 w-3" />
+                {portalLoading ? 'Opening…' : 'Manage Plan'}
               </button>
             )}
             <button
@@ -362,8 +400,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
             </Button>
           </div>
         </div>
-        {upgradeError && (
-          <p className="text-xs text-center text-destructive pb-2">{upgradeError}</p>
+        {(upgradeError || portalError) && (
+          <p className="text-xs text-center text-destructive pb-2">{upgradeError || portalError}</p>
         )}
       </header>
 
