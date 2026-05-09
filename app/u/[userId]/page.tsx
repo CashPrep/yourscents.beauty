@@ -1,6 +1,6 @@
-import { createClient as createUserClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -13,7 +13,6 @@ const FOREGROUND  = 'hsl(5 25% 22%)'
 const MUTED       = 'hsl(8 15% 52%)'
 
 // Service-role client bypasses RLS so any visitor can view a public scent card.
-// We only select the two columns the public page actually needs.
 function adminClient() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,19 +20,61 @@ function adminClient() {
   )
 }
 
-export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
-  const supabase = adminClient()
+type Props = { params: Promise<{ userId: string }> }
+
+// ── Per-page OG metadata ──────────────────────────────────────────────
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { userId } = await params
+  const supabase   = adminClient()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', userId)
+    .single()
+
+  const { count } = await supabase
+    .from('wardrobe_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  const name  = profile?.full_name || 'A Your Scents user'
+  const title = `${name}'s Fragrance Wardrobe ✨`
+  const desc  = `${name} is collecting ${count ?? 0} fragrance${count !== 1 ? 's' : ''} on Your Scents. See their wardrobe and discover new scents.`
+
+  return {
+    title,
+    description: desc,
+    openGraph: {
+      title,
+      description: desc,
+      type: 'profile',
+      url: `https://yourscents.beauty/u/${userId}`,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description: desc,
+    },
+  }
+}
+
+// ── Page ───────────────────────────────────────────────────────────────
+export default async function PublicProfilePage({ params }: Props) {
+  // Next.js 15: params is a Promise — must be awaited before accessing.
+  const { userId } = await params
+  const supabase   = adminClient()
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name, plan')
-    .eq('id', params.userId)
+    .eq('id', userId)
     .single()
 
   const { data: items } = await supabase
     .from('wardrobe_items')
     .select('*')
-    .eq('user_id', params.userId)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (!profile || !items) return notFound()
