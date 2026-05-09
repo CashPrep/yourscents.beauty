@@ -16,6 +16,11 @@ const R_DEEP   = 'hsl(3 40% 58%)'
 const R_BG     = 'hsl(8 56% 76% / 0.12)'
 const R_BORDER = 'hsl(8 56% 76% / 0.32)'
 
+// helper: given e.g. 'hsl(190 45% 58%)' returns 'hsl(190 45% 58% / 0.09)'
+function hslA(color: string, alpha: number) {
+  return color.replace(')', ` / ${alpha})`)
+}
+
 const PHOTOS = {
   hero:  'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=900&q=90&fit=crop',
   ctaBg: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1400&q=85&fit=crop',
@@ -200,7 +205,7 @@ function PerfumeCard({ p }: { p: typeof PERFUMES[0] }) {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {notes.map(n => (
-                      <span key={n} style={{ fontSize: '10px', padding: '2px 8px', background: `${color.slice(0,-1)} / 0.09)`, color, border: `1px solid ${color.slice(0,-1)} / 0.22)`, borderRadius: '999px' }}>{n}</span>
+                      <span key={n} style={{ fontSize: '10px', padding: '2px 8px', background: hslA(color, 0.09), color, border: `1px solid ${hslA(color, 0.22)}`, borderRadius: '999px' }}>{n}</span>
                     ))}
                   </div>
                 </div>
@@ -364,7 +369,6 @@ function LiveSearchSection() {
   const [stack, setStack]           = useState<SearchResult[]>([])
   const debounceRef                 = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (query.trim().length < 2) { setResults([]); return }
@@ -400,7 +404,7 @@ function LiveSearchSection() {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search 70,000+ fragrances — try \"Chanel\", \"oud\", \"Sauvage\"…"
+            placeholder={'Search 70,000+ fragrances — try "Chanel", "oud", "Sauvage"…'}
             className="w-full pl-10 pr-10 py-3 rounded-full text-sm border bg-card outline-none transition-colors"
             style={{ borderColor: query ? R_BORDER : 'hsl(10 25% 86%)', boxShadow: query ? `0 0 0 3px ${R_BG}` : 'none' }}
           />
@@ -741,7 +745,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Tab switcher — now includes Search tab */}
             <div className="flex justify-center mb-12">
               <div className="flex items-center gap-1 p-1 rounded-2xl" style={{ background: 'hsl(10 50% 95%)', border: '1px solid hsl(10 30% 88%)' }}>
                 {([
@@ -881,7 +884,7 @@ export default function HomePage() {
                 { icon: Flame,    color: 'hsl(13 55% 62%)',   term: 'Base Notes',  timing: '3 hr+',       body: 'Your lasting signature — musks, woods, vanilla, amber. These anchor the stack and fuse with skin.' },
               ].map(({ icon: Icon, color, term, timing, body }) => (
                 <div key={term} className="panel p-5 flex gap-4">
-                  <div className="mt-0.5 shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color.slice(0,-1)} / 0.10)` }}>
+                  <div className="mt-0.5 shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: hslA(color, 0.10) }}>
                     <Icon size={15} strokeWidth={1.5} style={{ color }} />
                   </div>
                   <div>
