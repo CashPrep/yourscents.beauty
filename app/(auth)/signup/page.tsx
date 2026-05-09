@@ -24,6 +24,7 @@ function SignupForm() {
     setLoading(true)
     setError('')
 
+    // 1. Create the account
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -39,6 +40,7 @@ function SignupForm() {
       return
     }
 
+    // 2. Ensure we have a live session — signUp may not return one on first call
     if (!data.session) {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
@@ -48,10 +50,40 @@ function SignupForm() {
       }
     }
 
-    if (plan !== 'free') {
-      router.push(`/api/checkout?plan=${plan}`)
-    } else {
+    // 3. Free plan — go straight to dashboard
+    if (plan === 'free') {
       router.push('/dashboard')
+      return
+    }
+
+    // 4. Paid plan — POST to /api/checkout AFTER the session cookie is set.
+    //    Using fetch (not router.push/GET) so the auth cookie travels with the
+    //    request and getUser() on the server always returns the real user.
+    //    We also add a short tick to guarantee the cookie is flushed.
+    await new Promise(r => setTimeout(r, 80))
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',          // send the Supabase auth cookie
+        body: JSON.stringify({ plan }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Checkout failed (${res.status})`)
+      }
+
+      const { url } = await res.json()
+      if (!url) throw new Error('No checkout URL returned')
+
+      // Full navigation to Stripe — must be window.location, not router.push
+      window.location.href = url
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong'
+      setError(`Couldn't open checkout: ${msg}. Please try again or contact support.`)
+      setLoading(false)
     }
   }
 
@@ -77,7 +109,7 @@ function SignupForm() {
       </div>
 
       <div className="panel-glow relative w-full max-w-sm p-8">
-        {/* Logo — cream background blends with logo palette */}
+        {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -138,7 +170,9 @@ function SignupForm() {
             className="btn-gold w-full text-sm mt-1"
             disabled={loading}
           >
-            {loading ? 'Creating account…' : 'Create Account 🌸'}
+            {loading
+              ? plan !== 'free' ? 'Setting up checkout…' : 'Creating account…'
+              : 'Create Account 🌸'}
           </Button>
         </form>
 
