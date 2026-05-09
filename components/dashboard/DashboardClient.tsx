@@ -45,8 +45,6 @@ const SORT_OPTIONS = [
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
 // ── Free plan upgrade gate banner ───────────────────────────────────────────
-// Uses /api/checkout?plan=pro so already-logged-in users go straight to Stripe,
-// not back through the signup flow.
 function FreePlanGate() {
   return (
     <div
@@ -66,7 +64,7 @@ function FreePlanGate() {
         </div>
         <div>
           <p className="text-sm font-semibold mb-1" style={{ color: FOREGROUND }}>
-            You've reached the 3-fragrance limit
+            You&apos;ve reached the 3-fragrance limit
           </p>
           <p className="text-xs leading-relaxed" style={{ color: MUTED }}>
             Free plan includes up to {FREE_LIMIT} fragrances. Upgrade to Pro for an unlimited wardrobe,
@@ -75,9 +73,7 @@ function FreePlanGate() {
         </div>
       </div>
       <Link href="/api/checkout?plan=pro" className="shrink-0">
-        <button
-          className="btn-gold flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap"
-        >
+        <button className="btn-gold flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap">
           Upgrade to Pro
           <ArrowRight className="h-3 w-3" />
         </button>
@@ -87,8 +83,10 @@ function FreePlanGate() {
 }
 
 // ── Scent card share panel ───────────────────────────────────────────────────
+// Display text reflects the real deployed domain via window.location.host.
 function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: boolean; onCopy: () => void }) {
-  const profileUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/u/${userId}`
+  const host = typeof window !== 'undefined' ? window.location.host : 'yourscents.beauty'
+  const shortId = userId.slice(0, 8)
   return (
     <div
       className="rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"
@@ -108,7 +106,7 @@ function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: bo
         <div>
           <p className="text-sm font-semibold mb-0.5" style={{ color: FOREGROUND }}>Your Scent Card</p>
           <p className="text-[11px] font-mono truncate max-w-[220px]" style={{ color: MUTED }}>
-            yourscents.app/u/{userId.slice(0, 8)}…
+            {host}/u/{shortId}…
           </p>
         </div>
       </div>
@@ -229,7 +227,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         style={{ background: 'hsl(18 60% 98% / 0.88)', backdropFilter: 'blur(18px)', borderColor: 'hsl(10 30% 88%)' }}
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Full logo — no circle crop */}
           <div className="flex items-center gap-3">
             <Link href="/">
               <Image src="/logo.png" alt="Your Scents" width={120} height={44} className="h-10 w-auto object-contain" />
@@ -238,7 +235,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               {planLabel}
             </span>
           </div>
-          {/* Right: share + email + logout */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleShare}
@@ -258,12 +254,10 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
 
       <div className="max-w-6xl mx-auto px-4 py-6">
 
-        {/* ── Scent card panel (always visible) ── */}
         {wardrobe.length > 0 && (
           <ScentCardPanel userId={user.id} copied={copied} onCopy={handleShare} />
         )}
 
-        {/* ── Scent of the Day ── */}
         {wardrobe.length > 0 && (
           <div className="mb-6"><ScentOfTheDay wardrobe={wardrobe} /></div>
         )}
@@ -285,11 +279,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           ))}
         </div>
 
-        {/* ── Free plan gate banner ── */}
         {atLimit && (
-          <div className="mb-6">
-            <FreePlanGate />
-          </div>
+          <div className="mb-6"><FreePlanGate /></div>
         )}
 
         {/* ── Tabs ── */}
@@ -352,7 +343,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
-                {/* Add button — disabled at limit for free users */}
                 <button
                   onClick={handleAddClick}
                   className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-semibold transition-all"
@@ -371,11 +361,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
               </div>
             </div>
 
-            {/* Inline upgrade nudge when user clicks locked Add button */}
             {addBlocked && atLimit && (
-              <div className="mb-5">
-                <FreePlanGate />
-              </div>
+              <div className="mb-5"><FreePlanGate /></div>
             )}
 
             {displayWardrobe.length === 0 && (
