@@ -640,7 +640,7 @@ export default function HomePage() {
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-0">
-            <Image src="/logo.jpg" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" />
+            <Image src="/logo.png" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <Link href="#stack"      className="hover:text-foreground transition-colors">Stack Builder</Link>
@@ -1086,7 +1086,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
             <div>
-              <Image src="/logo.jpg" alt="Your Scents Logo" width={48} height={48} className="h-12 w-12 object-contain mb-2" />
+              <Image src="/logo.png" alt="Your Scents Logo" width={48} height={48} className="h-12 w-12 object-contain mb-2" />
               <p className="text-xs text-muted-foreground">The intelligent fragrance wardrobe.</p>
             </div>
             <div className="flex gap-6 text-xs text-muted-foreground">
