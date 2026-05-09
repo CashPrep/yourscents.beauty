@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createUserClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -11,8 +12,17 @@ const CREAM       = 'hsl(18 50% 97%)'
 const FOREGROUND  = 'hsl(5 25% 22%)'
 const MUTED       = 'hsl(8 15% 52%)'
 
+// Service-role client bypasses RLS so any visitor can view a public scent card.
+// We only select the two columns the public page actually needs.
+function adminClient() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
 export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
-  const supabase = await createClient()
+  const supabase = adminClient()
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -45,7 +55,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: 'hsl(13 48% 65% / 0.16)' }} />
       </div>
 
-      {/* Nav — full logo, matches rest of site */}
+      {/* Nav */}
       <header
         className="fixed top-0 inset-x-0 z-50 border-b"
         style={{ background: 'hsl(18 60% 98% / 0.92)', backdropFilter: 'blur(20px)', borderColor: ROSE_BORDER }}
