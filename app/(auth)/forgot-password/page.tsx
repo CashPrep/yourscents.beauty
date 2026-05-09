@@ -1,17 +1,58 @@
 'use client'
-import { useState } from 'react'
+import { useState, Component, type ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const R      = 'hsl(8 48% 72%)'
-const R_DEEP = 'hsl(3 40% 58%)'
+const R = 'hsl(8 48% 72%)'
 
-export default function ForgotPasswordPage() {
-  const supabase = createClient()
+// ── Error boundary ──
+class FormErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: string | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { error: null }
+  }
+  static getDerivedStateFromError(err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Something went wrong loading this page.'
+    return { error: msg }
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
+          <div className="panel-glow w-full max-w-sm p-8 text-center">
+            <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Couldn&apos;t load this page</p>
+            <p className="text-xs mb-4" style={{ color: 'hsl(8 15% 52%)' }}>{this.state.error}</p>
+            <button onClick={() => window.location.reload()} className="btn-gold text-xs px-5 py-2">Try again</button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+// ── Env-var guard ──
+function EnvGuard({ children }: { children: ReactNode }) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
+        <div className="panel-glow w-full max-w-sm p-8 text-center">
+          <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Configuration error</p>
+          <p className="text-xs" style={{ color: 'hsl(8 15% 52%)' }}>Missing Supabase environment variables. Please contact support.</p>
+        </div>
+      </div>
+    )
+  }
+  return <>{children}</>
+}
+
+function ForgotPasswordForm() {
   const [email,   setEmail]   = useState('')
   const [loading, setLoading] = useState(false)
   const [done,    setDone]    = useState(false)
@@ -21,6 +62,17 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Lazy-init: only create the client on submit
+    let supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      supabase = createClient()
+    } catch {
+      setError('Could not connect to authentication service. Please refresh and try again.')
+      setLoading(false)
+      return
+    }
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
@@ -61,14 +113,11 @@ export default function ForgotPasswordPage() {
             <p className="text-2xl mb-3">📬</p>
             <h1 className="text-xl font-light serif mb-2">Check your inbox</h1>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              We sent a password reset link to <strong className="text-foreground">{email}</strong>.
-              It expires in 1 hour.
+              We sent a password reset link to <strong className="text-foreground">{email}</strong>. It expires in 1 hour.
             </p>
             <p className="text-xs text-muted-foreground">
               Didn&apos;t receive it?{' '}
-              <button onClick={() => setDone(false)} className="underline hover:text-foreground" style={{ color: R }}>
-                Try again
-              </button>
+              <button onClick={() => setDone(false)} className="underline hover:text-foreground" style={{ color: R }}>Try again</button>
             </p>
           </div>
         ) : (
@@ -77,7 +126,6 @@ export default function ForgotPasswordPage() {
             <p className="text-sm mb-7 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
               Enter your email and we&apos;ll send a reset link.
             </p>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-xs font-medium">Email</Label>
@@ -107,5 +155,15 @@ export default function ForgotPasswordPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <FormErrorBoundary>
+      <EnvGuard>
+        <ForgotPasswordForm />
+      </EnvGuard>
+    </FormErrorBoundary>
   )
 }
