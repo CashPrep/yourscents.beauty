@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import {
   Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp,
   Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight, PartyPopper,
+  type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
@@ -19,7 +20,6 @@ import StackSuggestions from './StackSuggestions'
 import MoodMatcher from './MoodMatcher'
 import SeasonalRotation from './SeasonalRotation'
 
-// ── Brand tokens ───────────────────────────────────────────
 const ROSE        = 'hsl(8 48% 72%)'
 const ROSE_BG     = 'hsl(8 56% 76% / 0.12)'
 const ROSE_BORDER = 'hsl(8 56% 76% / 0.32)'
@@ -31,10 +31,22 @@ const MUTED       = 'hsl(8 15% 52%)'
 const FREE_LIMIT = 3
 
 interface Props {
-  user: any
-  wardrobe: any[]
-  profile: any
+  user: { id: string; email?: string }
+  wardrobe: WardrobeItem[]
+  profile: { plan?: string } | null
   justUpgraded?: boolean
+}
+
+interface WardrobeItem {
+  id: string
+  fragrance_name: string
+  brand: string
+  rating?: number
+  personal_note?: string
+  accords?: string[]
+  notes?: string[] | { top: string[]; middle: string[]; base: string[] }
+  image_url?: string | null
+  [key: string]: unknown
 }
 
 type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna' | 'mood' | 'seasonal'
@@ -48,7 +60,6 @@ const SORT_OPTIONS = [
 
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
-// ── POST checkout helper ────────────────────────────────────────
 async function startCheckout(
   plan: 'pro' | 'collector',
   setLoading: (v: boolean) => void,
@@ -65,9 +76,9 @@ async function startCheckout(
     })
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || `Checkout failed (${res.status})`)
+      throw new Error((body as { error?: string }).error || `Checkout failed (${res.status})`)
     }
-    const { url } = await res.json()
+    const { url } = await res.json() as { url: string }
     if (!url) throw new Error('No checkout URL returned')
     window.location.href = url
   } catch (err: unknown) {
@@ -77,7 +88,6 @@ async function startCheckout(
   }
 }
 
-// ── Upgrade success banner ───────────────────────────────────────
 function UpgradedBanner({ plan, onDismiss }: { plan: string; onDismiss: () => void }) {
   return (
     <div
@@ -115,7 +125,6 @@ function UpgradedBanner({ plan, onDismiss }: { plan: string; onDismiss: () => vo
   )
 }
 
-// ── Free plan upgrade gate banner ─────────────────────────────────
 function FreePlanGate() {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
@@ -159,7 +168,6 @@ function FreePlanGate() {
   )
 }
 
-// ── Scent card share panel ────────────────────────────────────────
 function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: boolean; onCopy: () => void }) {
   const host = typeof window !== 'undefined' ? window.location.host : 'yourscents.beauty'
   const shortId = userId.slice(0, 8)
@@ -208,30 +216,23 @@ function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: bo
 
 export default function DashboardClient({ user, wardrobe: initialWardrobe, profile, justUpgraded = false }: Props) {
   const router   = useRouter()
-  const pathname = usePathname()
   const supabase = createClient()
 
-  const [wardrobe, setWardrobe]               = useState(initialWardrobe)
-  const [showAddModal, setShowAddModal]        = useState(false)
-  const [activeTab, setActiveTab]              = useState<Tab>('wardrobe')
-  const [sort, setSort]                        = useState('recent')
-  const [accordFilter, setAccordFilter]        = useState('all')
-  const [copied, setCopied]                    = useState(false)
-  const [addBlocked, setAddBlocked]            = useState(false)
-  const [upgradeLoading, setUpgradeLoading]    = useState(false)
-  const [upgradeError,   setUpgradeError]      = useState('')
-  // Optimistic plan — if Stripe webhook fires before next page load this will
-  // already be correct from DB. If not, we show optimistic 'pro' until refresh.
-  const [optimisticPlan, setOptimisticPlan]    = useState<string | null>(null)
+  const [wardrobe, setWardrobe]                     = useState<WardrobeItem[]>(initialWardrobe)
+  const [showAddModal, setShowAddModal]             = useState(false)
+  const [activeTab, setActiveTab]                   = useState<Tab>('wardrobe')
+  const [sort, setSort]                             = useState('recent')
+  const [accordFilter, setAccordFilter]             = useState('all')
+  const [copied, setCopied]                         = useState(false)
+  const [addBlocked, setAddBlocked]                 = useState(false)
+  const [upgradeLoading, setUpgradeLoading]         = useState(false)
+  const [upgradeError,   setUpgradeError]           = useState('')
+  const [optimisticPlan, setOptimisticPlan]         = useState<string | null>(null)
   const [showUpgradedBanner, setShowUpgradedBanner] = useState(justUpgraded)
 
-  // When returning from Stripe with ?upgraded=true, clean the URL and set
-  // an optimistic plan so the UI immediately reflects the new state even if
-  // the webhook hasn't written to the DB yet.
   useEffect(() => {
     if (justUpgraded) {
       setOptimisticPlan('pro')
-      // Remove ?upgraded=true from URL without full navigation
       const url = new URL(window.location.href)
       url.searchParams.delete('upgraded')
       window.history.replaceState({}, '', url.toString())
@@ -247,8 +248,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
     router.push('/')
   }
 
-  const handleFragranceAdded = (item: any) => {
-    setWardrobe((prev: any[]) => [item, ...prev])
+  const handleFragranceAdded = (item: WardrobeItem) => {
+    setWardrobe(prev => [item, ...prev])
     setShowAddModal(false)
     setAddBlocked(false)
   }
@@ -261,15 +262,16 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   const handleRemove = async (id: string) => {
     await fetch('/api/wardrobe', {
       method: 'DELETE',
-      body: JSON.stringify({ id }),
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id }),
     })
-    setWardrobe((prev: any[]) => prev.filter((i: any) => i.id !== id))
+    setWardrobe(prev => prev.filter(i => i.id !== id))
     setAddBlocked(false)
   }
 
   const handleRatingUpdate = (id: string, rating: number, note: string) => {
-    setWardrobe((prev: any[]) => prev.map((i: any) =>
+    setWardrobe(prev => prev.map(i =>
       i.id === id ? { ...i, rating, personal_note: note } : i,
     ))
   }
@@ -282,18 +284,18 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const displayWardrobe = [...wardrobe]
-    .filter((item: any) =>
+    .filter(item =>
       accordFilter === 'all' ||
-      (item.accords || []).some((a: string) => a.toLowerCase().includes(accordFilter)),
+      (item.accords || []).some(a => a.toLowerCase().includes(accordFilter)),
     )
-    .sort((a: any, b: any) => {
+    .sort((a, b) => {
       if (sort === 'name')   return a.fragrance_name.localeCompare(b.fragrance_name)
       if (sort === 'brand')  return a.brand.localeCompare(b.brand)
       if (sort === 'rating') return (b.rating || 0) - (a.rating || 0)
       return 0
     })
 
-  const tabs: { id: Tab; label: string; icon: any; badge?: number; isNew?: boolean }[] = [
+  const tabs: { id: Tab; label: string; icon: LucideIcon; badge?: number; isNew?: boolean }[] = [
     { id: 'wardrobe',  label: 'Wardrobe',  icon: Star,       badge: wardrobe.length },
     { id: 'stacks',    label: 'Stacks',    icon: Layers },
     { id: 'occasions', label: 'Occasions', icon: Calendar },
@@ -303,11 +305,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
     { id: 'dna',       label: 'Scent DNA', icon: Dna },
   ]
 
-  const avgRating = wardrobe.filter((i: any) => i.rating).length
-    ? (
-        wardrobe.filter((i: any) => i.rating).reduce((s: number, i: any) => s + (i.rating || 0), 0) /
-        wardrobe.filter((i: any) => i.rating).length
-      ).toFixed(1)
+  const ratedItems = wardrobe.filter(i => i.rating)
+  const avgRating  = ratedItems.length
+    ? (ratedItems.reduce((s, i) => s + (i.rating ?? 0), 0) / ratedItems.length).toFixed(1)
     : null
 
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1)
@@ -325,7 +325,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           'radial-gradient(ellipse 70% 40% at 50% -5%, hsl(8 56% 76% / 0.12) 0%, transparent 65%), radial-gradient(ellipse 50% 30% at 100% 100%, hsl(13 48% 65% / 0.08) 0%, transparent 60%)',
       }}
     >
-      {/* ── Header ── */}
       <header
         className="border-b sticky top-0 z-40"
         style={{ background: 'hsl(18 60% 98% / 0.88)', backdropFilter: 'blur(18px)', borderColor: 'hsl(10 30% 88%)' }}
@@ -369,13 +368,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-
-        {/* ── Post-checkout success banner ── */}
         {showUpgradedBanner && (
-          <UpgradedBanner
-            plan={plan}
-            onDismiss={() => setShowUpgradedBanner(false)}
-          />
+          <UpgradedBanner plan={plan} onDismiss={() => setShowUpgradedBanner(false)} />
         )}
 
         {wardrobe.length > 0 && (
@@ -386,13 +380,12 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           <div className="mb-6"><ScentOfTheDay wardrobe={wardrobe} /></div>
         )}
 
-        {/* ── Stats row ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          {[
+          {([
             { label: 'Bottles',    value: isFree ? `${wardrobe.length} / ${FREE_LIMIT}` : `${wardrobe.length}`, icon: Star },
             { label: 'Avg Rating', value: avgRating ? `${avgRating}/5` : '—', icon: Sparkles },
             { label: 'Plan',       value: planLabel, icon: Zap },
-          ].map(({ label, value, icon: Icon }) => (
+          ] as { label: string; value: string; icon: LucideIcon }[]).map(({ label, value, icon: Icon }) => (
             <div key={label} className="panel-glow rounded-xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="h-3.5 w-3.5" style={{ color: ROSE }} />
@@ -407,7 +400,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           <div className="mb-6"><FreePlanGate /></div>
         )}
 
-        {/* ── Tabs ── */}
         <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
           {tabs.map(({ id, label, icon: Icon, badge, isNew }) => (
             <button
@@ -436,7 +428,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           ))}
         </div>
 
-        {/* ── Tab: Wardrobe ── */}
         {activeTab === 'wardrobe' && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -505,7 +496,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
 
             {displayWardrobe.length > 0 && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {displayWardrobe.map((item: any) => (
+                {displayWardrobe.map(item => (
                   <WardrobeCard
                     key={item.id}
                     item={item}
@@ -524,7 +515,6 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         {activeTab === 'seasonal'  && <SeasonalRotation wardrobe={wardrobe} />}
         {activeTab === 'discover'  && <DiscoveryFeed    wardrobe={wardrobe} />}
         {activeTab === 'dna'       && <ScentDNA         wardrobe={wardrobe} />}
-
       </div>
 
       {showAddModal && (

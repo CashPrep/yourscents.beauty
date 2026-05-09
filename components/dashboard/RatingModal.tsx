@@ -1,4 +1,5 @@
 'use client'
+import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { X, Star, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,12 @@ import { useToast } from '@/components/ui/toaster'
 const ROSE = 'hsl(340 55% 62%)'
 
 interface Props {
-  item: any
+  item: {
+    id: string
+    fragrance_name: string
+    rating?: number
+    personal_note?: string
+  }
   onClose: () => void
   onSaved: (id: string, rating: number, note: string) => void
 }
@@ -24,7 +30,6 @@ export default function RatingModal({ item, onClose, onSaved }: Props) {
     setSaving(true)
     setSaveErr('')
     try {
-      // PATCH /api/wardrobe — added in Step 13
       const res = await fetch('/api/wardrobe', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -33,7 +38,7 @@ export default function RatingModal({ item, onClose, onSaved }: Props) {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || `Save failed (${res.status})`)
+        throw new Error((body as { error?: string }).error || `Save failed (${res.status})`)
       }
       onSaved(item.id, rating, note)
       toast({ title: 'Saved! ✨', description: `${item.fragrance_name} rated ${rating}⭐` })
@@ -56,7 +61,6 @@ export default function RatingModal({ item, onClose, onSaved }: Props) {
           </button>
         </div>
 
-        {/* Star rating */}
         <div>
           <p className="text-xs text-muted-foreground mb-2">Your Rating</p>
           <div className="flex gap-1">
@@ -80,12 +84,11 @@ export default function RatingModal({ item, onClose, onSaved }: Props) {
           </div>
         </div>
 
-        {/* Personal note */}
         <div>
           <p className="text-xs text-muted-foreground mb-2">Personal Note <span className="opacity-60">(optional)</span></p>
           <textarea
             className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 h-24"
-            style={{ '--tw-ring-color': ROSE } as React.CSSProperties}
+            style={{ '--tw-ring-color': ROSE } as CSSProperties}
             placeholder="e.g. Wore this to prom 💕 — best night ever"
             value={note}
             onChange={e => setNote(e.target.value.slice(0, 500))}
@@ -94,7 +97,6 @@ export default function RatingModal({ item, onClose, onSaved }: Props) {
           <p className="text-[10px] text-muted-foreground text-right mt-1">{note.length}/500</p>
         </div>
 
-        {/* Save error */}
         {saveErr && (
           <div className="flex items-center gap-2 text-xs text-destructive px-3 py-2 rounded-xl bg-destructive/10">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
