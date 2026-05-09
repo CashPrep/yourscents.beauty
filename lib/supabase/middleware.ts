@@ -1,3 +1,7 @@
+// This file is kept for any external imports that still reference it,
+// but route protection logic now lives directly in middleware.ts.
+// See: https://supabase.com/docs/guides/auth/server-side/nextjs
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
