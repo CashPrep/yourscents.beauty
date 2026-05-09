@@ -16,7 +16,7 @@ import StackSuggestions from './StackSuggestions'
 import MoodMatcher from './MoodMatcher'
 import SeasonalRotation from './SeasonalRotation'
 
-// ── Brand tokens ────────────────────────────────────────────────────────────
+// ── Brand tokens ───────────────────────────────────────────
 const ROSE        = 'hsl(8 48% 72%)'
 const ROSE_BG     = 'hsl(8 56% 76% / 0.12)'
 const ROSE_BORDER = 'hsl(8 56% 76% / 0.32)'
@@ -44,8 +44,37 @@ const SORT_OPTIONS = [
 
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
-// ── Free plan upgrade gate banner ───────────────────────────────────────────
+// ── Shared upgrade helper ────────────────────────────────────────
+// Uses POST (not GET) so the session cookie is always sent with the request.
+// This is the same pattern used in the signup flow (Step 4).
+async function startCheckout(plan: 'pro' | 'collector', setLoading: (v: boolean) => void, setError: (v: string) => void) {
+  setLoading(true)
+  setError('')
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ plan }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error(body.error || `Checkout failed (${res.status})`)
+    }
+    const { url } = await res.json()
+    if (!url) throw new Error('No checkout URL returned')
+    window.location.href = url
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Something went wrong'
+    setError(msg)
+    setLoading(false)
+  }
+}
+
+// ── Free plan upgrade gate banner ─────────────────────────────────
 function FreePlanGate() {
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState('')
   return (
     <div
       className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -70,20 +99,23 @@ function FreePlanGate() {
             Free plan includes up to {FREE_LIMIT} fragrances. Upgrade to Pro for an unlimited wardrobe,
             full stack scoring, and shareable scent cards.
           </p>
+          {error && (
+            <p className="text-xs mt-2 text-destructive">{error}</p>
+          )}
         </div>
       </div>
-      <Link href="/api/checkout?plan=pro" className="shrink-0">
-        <button className="btn-gold flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap">
-          Upgrade to Pro
-          <ArrowRight className="h-3 w-3" />
-        </button>
-      </Link>
+      <button
+        onClick={() => startCheckout('pro', setLoading, setError)}
+        disabled={loading}
+        className="btn-gold shrink-0 flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap"
+      >
+        {loading ? 'Opening checkout…' : <><span>Upgrade to Pro</span><ArrowRight className="h-3 w-3" /></>}
+      </button>
     </div>
   )
 }
 
-// ── Scent card share panel ───────────────────────────────────────────────────
-// Display text reflects the real deployed domain via window.location.host.
+// ── Scent card share panel ────────────────────────────────────────
 function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: boolean; onCopy: () => void }) {
   const host = typeof window !== 'undefined' ? window.location.host : 'yourscents.beauty'
   const shortId = userId.slice(0, 8)
@@ -143,7 +175,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   const [accordFilter, setAccordFilter]   = useState('all')
   const [copied, setCopied]               = useState(false)
   const [addBlocked, setAddBlocked]       = useState(false)
-  const plan = profile?.plan || 'free'
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
+  const [upgradeError,   setUpgradeError]   = useState('')
+  const plan   = profile?.plan || 'free'
   const isFree = plan === 'free'
   const atLimit = isFree && wardrobe.length >= FREE_LIMIT
 
@@ -159,10 +193,7 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
   }
 
   const handleAddClick = () => {
-    if (atLimit) {
-      setAddBlocked(true)
-      return
-    }
+    if (atLimit) { setAddBlocked(true); return }
     setShowAddModal(true)
   }
 
@@ -236,6 +267,15 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {isFree && (
+              <button
+                onClick={() => startCheckout('pro', setUpgradeLoading, setUpgradeError)}
+                disabled={upgradeLoading}
+                className="btn-gold flex items-center gap-1.5 text-xs px-3 py-1.5"
+              >
+                {upgradeLoading ? 'Opening…' : '✨ Upgrade'}
+              </button>
+            )}
             <button
               onClick={handleShare}
               className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
@@ -250,6 +290,9 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
             </Button>
           </div>
         </div>
+        {upgradeError && (
+          <p className="text-xs text-center text-destructive pb-2">{upgradeError}</p>
+        )}
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -395,11 +438,11 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
         )}
 
         {activeTab === 'stacks'    && <StackSuggestions wardrobe={wardrobe} />}
-        {activeTab === 'occasions' && <OccasionPlanner wardrobe={wardrobe} />}
-        {activeTab === 'mood'      && <MoodMatcher wardrobe={wardrobe} />}
+        {activeTab === 'occasions' && <OccasionPlanner  wardrobe={wardrobe} />}
+        {activeTab === 'mood'      && <MoodMatcher      wardrobe={wardrobe} />}
         {activeTab === 'seasonal'  && <SeasonalRotation wardrobe={wardrobe} />}
-        {activeTab === 'discover'  && <DiscoveryFeed wardrobe={wardrobe} />}
-        {activeTab === 'dna'       && <ScentDNA wardrobe={wardrobe} />}
+        {activeTab === 'discover'  && <DiscoveryFeed    wardrobe={wardrobe} />}
+        {activeTab === 'dna'       && <ScentDNA         wardrobe={wardrobe} />}
 
       </div>
 
