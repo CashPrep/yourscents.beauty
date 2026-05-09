@@ -45,6 +45,8 @@ const SORT_OPTIONS = [
 const ACCORD_FILTERS = ['all','floral','fresh','woody','sweet','musky','fruity','spicy','aromatic']
 
 // ── Free plan upgrade gate banner ───────────────────────────────────────────
+// Uses /api/checkout?plan=pro so already-logged-in users go straight to Stripe,
+// not back through the signup flow.
 function FreePlanGate() {
   return (
     <div
@@ -72,7 +74,7 @@ function FreePlanGate() {
           </p>
         </div>
       </div>
-      <Link href="/signup?plan=pro" className="shrink-0">
+      <Link href="/api/checkout?plan=pro" className="shrink-0">
         <button
           className="btn-gold flex items-center gap-2 px-5 py-2.5 text-xs whitespace-nowrap"
         >
@@ -362,8 +364,8 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
                   title={atLimit ? 'Upgrade to add more fragrances' : 'Add fragrance'}
                 >
                   {atLimit
-                    ? <><Lock className="h-3 w-3" /> Upgrade</>  
-                    : <><Plus className="h-3.5 w-3.5" /> Add</> 
+                    ? <><Lock className="h-3 w-3" /> Upgrade</>
+                    : <><Plus className="h-3.5 w-3.5" /> Add</>
                   }
                 </button>
               </div>
