@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-// ── Error boundary so a crash renders an error card, never a silent dead form ──
+// ── Error boundary ──────────────────────────────────────────────────────────
 class FormErrorBoundary extends Component<
   { children: ReactNode },
   { error: string | null }
@@ -48,11 +48,18 @@ class FormErrorBoundary extends Component<
   }
 }
 
-// ── Env-var guard — surfaces missing config clearly instead of a dead button ──
+// ── Env-var guard ────────────────────────────────────────────────────────────
 function EnvGuard({ children }: { children: ReactNode }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) {
+    // Log to browser console so the Vercel deployment log also captures it.
+    if (typeof window !== 'undefined') {
+      console.error(
+        '[YourScents] Missing Supabase env vars.\n' +
+        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.'
+      )
+    }
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4"
@@ -126,14 +133,18 @@ function SignupForm() {
       }
     }
 
-    // 3. Free plan — go straight to dashboard
+    // 3. Commit the session cookie to the server before navigating so the
+    //    middleware and /api/checkout can see the authenticated user.
+    router.refresh()
+
+    // 4. Free plan — go straight to dashboard
     if (plan === 'free') {
       router.push('/dashboard')
       return
     }
 
-    // 4. Paid plan — POST to /api/checkout after session cookie is set
-    await new Promise(r => setTimeout(r, 80))
+    // 5. Paid plan — short wait for cookie propagation, then POST to /api/checkout
+    await new Promise(r => setTimeout(r, 150))
 
     try {
       const res = await fetch('/api/checkout', {
@@ -228,7 +239,9 @@ function SignupForm() {
 
         <p className="text-center text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>Sign in</Link>
+          <Link href="/login" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>
+            Sign in
+          </Link>
         </p>
         <p className="text-center text-xs mt-2" style={{ color: 'hsl(8 15% 52%)' }}>
           <Link href="/" className="hover:underline opacity-60">← Back to home</Link>

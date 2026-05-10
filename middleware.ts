@@ -4,19 +4,28 @@ import { createServerClient } from '@supabase/ssr'
 // Routes that require a logged-in session.
 const PROTECTED = ['/dashboard']
 
-// Routes that logged-in users should be bounced away from
-// (no point showing login/signup to someone already authed).
+// Routes that logged-in users should be bounced away from.
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // ── 1. Refresh the Supabase session cookie (required by @supabase/ssr) ──
+  // ── 1. Bail early if Supabase env vars are missing ──────────────────────
+  // Without this guard, createServerClient throws and the middleware crashes
+  // silently — making every navigation appear "unresponsive" to the user.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return NextResponse.next({ request })
+  }
+
+  // ── 2. Refresh the Supabase session cookie (required by @supabase/ssr) ──
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() { return request.cookies.getAll() },
@@ -31,11 +40,19 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // getUser() is the only call Supabase recommends here — it also refreshes
-  // the token if it's expired and writes the new cookie via setAll above.
-  const { data: { user } } = await supabase.auth.getUser()
+  // Wrap in try/catch — a network error or invalid JWT must never crash
+  // the middleware and leave the user staring at a dead page.
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // Could not reach Supabase — allow the request through so static pages
+    // and auth forms still render; protected routes will catch it on load.
+    return response
+  }
 
-  // ── 2. Protect /dashboard/* — redirect unauthenticated users to login ──
+  // ── 3. Protect /dashboard/* ──────────────────────────────────────────────
   const isProtected = PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
   if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone()
@@ -44,7 +61,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // ── 3. Bounce logged-in users away from auth pages → dashboard ──────────
+  // ── 4. Bounce logged-in users away from auth pages ───────────────────────
   const isAuthRoute = AUTH_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))
   if (isAuthRoute && user) {
     const dashUrl = request.nextUrl.clone()
@@ -58,7 +75,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on all routes except static assets, images, and Next internals.
     '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
