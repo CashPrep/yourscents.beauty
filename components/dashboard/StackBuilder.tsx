@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Loader2, Sparkles, Check } from 'lucide-react'
+import { Loader2, Sparkles, Check, FlaskConical } from 'lucide-react'
 import NoteOverlap from './NoteOverlap'
 
 const ROSE = 'hsl(340 55% 62%)'
@@ -117,6 +117,19 @@ export default function StackBuilder({ wardrobe, userId }: Props) {
                 'bg-orange-100 text-orange-700'
               }`}>{result.confidence} confidence</span>
             </div>
+
+            {/* ── Stack Reasoning ─────────────────────────────────────── */}
+            {result.stackReasoning && (
+              <div
+                className="flex gap-3 rounded-xl p-4"
+                style={{ background: ROSE_LIGHT, borderLeft: `3px solid ${ROSE}` }}
+              >
+                <FlaskConical className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: ROSE }} />
+                <p className="text-sm leading-relaxed" style={{ color: 'hsl(340 40% 30%)' }}>
+                  {result.stackReasoning}
+                </p>
+              </div>
+            )}
 
             <div>
               <h3 className="font-semibold mb-3 text-sm">Best Occasions</h3>

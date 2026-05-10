@@ -85,6 +85,68 @@ export const NOTE_FAMILY_MAP: Record<string, string[]> = {
   fruity: ['apple', 'peach', 'raspberry', 'blackcurrant', 'pear', 'plum', 'apricot'],
 }
 
+// Describes how two note families interact when layered
+const FAMILY_SYNERGY: Record<string, Record<string, string>> = {
+  amber: {
+    woody:    'warm amber accords anchor the woody drydown, adding depth and longevity',
+    spicy:    'amber\u2019s resinous sweetness amplifies spice without turning sharp',
+    musky:    'amber and musk merge into a skin-close, sensual base',
+    floral:   'amber lifts floral notes into something richer and more intoxicating',
+    gourmand: 'amber adds a golden warmth that rounds out gourmand sweetness',
+    citrus:   'amber grounds citrus brightness so it lingers instead of disappearing',
+    fresh:    'amber\u2019s warmth contrasts fresh notes, creating a signature tension',
+  },
+  woody: {
+    amber:    'woody dryness contrasts amber\u2019s sweetness for a balanced, earthy finish',
+    spicy:    'wood and spice share dry warmth, making the combination feel cohesive',
+    musky:    'woody accords give musk a natural, forest-floor grounding',
+    floral:   'woody base lifts florals off the skin and extends their longevity',
+    citrus:   'cedar or sandalwood softens citrus\u2019 sharpness into a smooth accord',
+    fresh:    'damp wood notes complement fresh accords with an outdoor naturalness',
+    gourmand: 'woody dryness prevents gourmand notes from becoming cloying',
+  },
+  spicy: {
+    amber:    'spice rides amber\u2019s warmth, projecting further and more evenly',
+    woody:    'spice and wood share the same dry, aromatic register',
+    musky:    'spice gives musk an edge, making the skin scent feel more complex',
+    floral:   'a spicy undercurrent gives florals an unexpected, alluring bite',
+    gourmand: 'spice adds intrigue to sweet gourmand notes, preventing one-dimensionality',
+    citrus:   'pepper or cardamom sharpens citrus into a sophisticated opening',
+  },
+  floral: {
+    musky:    'musk amplifies floral diffusion, pushing petals outward on the skin',
+    woody:    'woody accords give florals a rooted, sustainable foundation',
+    citrus:   'bright citrus opens the floral heart with freshness and clarity',
+    powdery:  'powdery accords soften florals into something skin-like and intimate',
+    gourmand: 'gourmand sweetness turns florals lush and almost edible',
+    fresh:    'fresh accords keep florals airy and modern rather than heavy',
+  },
+  citrus: {
+    floral:   'citrus top notes brighten the floral heart for a radiant opening',
+    woody:    'woody base extends ephemeral citrus far beyond its natural lifespan',
+    fresh:    'citrus and fresh accords combine into a clean, ozonic brightness',
+    musky:    'musk anchors citrus so the brightness stays rather than evaporating',
+  },
+  musky: {
+    floral:   'musk acts as a diffuser, projecting floral notes further from the skin',
+    amber:    'warm musk and amber blur together into an irresistibly skin-close base',
+    woody:    'musky accords blend seamlessly with woody drydown notes',
+    spicy:    'musk softens spice\u2019s edge into something sensual rather than sharp',
+  },
+  fresh: {
+    woody:    'fresh accords and woody base create a just-stepped-outdoors effect',
+    citrus:   'fresh + citrus is the quintessential clean, modern pairing',
+    floral:   'fresh accords keep florals light and wearable for daytime',
+    musky:    'clean musk extends freshness beyond the first hour',
+  },
+  gourmand: {
+    amber:    'amber\u2019s warmth deepens gourmand sweetness from dessert to perfume',
+    woody:    'woody dryness offsets sweetness so the combination reads sophisticated',
+    spicy:    'spice gives sweet gourmand notes a complex, mulled quality',
+    musky:    'musk rounds out gourmand edges into a pillowy, enveloping finish',
+  },
+}
+
 export interface WardrobeItem {
   id: string
   fragrance_id: string
@@ -102,6 +164,7 @@ export interface StackAnalysis {
   layeringAdvice: string[]
   confidence: 'high' | 'medium' | 'experimental'
   applicationOrder: string[]
+  stackReasoning: string   // NEW: human-readable explanation of why these fragrances work together
 }
 
 export function scoreFragranceForOccasion(item: WardrobeItem, occasionKey: string): number {
@@ -129,6 +192,63 @@ export function getNoteFamily(note: string): string {
     }
   }
   return 'other'
+}
+
+/**
+ * Generates a human-readable explanation of why this fragrance stack works.
+ * Uses the dominant note families of each fragrance + the FAMILY_SYNERGY map.
+ */
+export function buildStackReasoning(items: WardrobeItem[]): string {
+  if (items.length < 2) return ''
+
+  // Find the dominant accord/family per fragrance
+  const getDominantFamily = (item: WardrobeItem): string => {
+    // Prefer explicit accords over notes for dominance
+    const sources = [...(item.accords || []), ...(item.notes || [])]
+    const familyCounts: Record<string, number> = {}
+    sources.forEach(s => {
+      const f = getNoteFamily(s.toLowerCase())
+      if (f !== 'other') familyCounts[f] = (familyCounts[f] || 0) + 1
+    })
+    const sorted = Object.entries(familyCounts).sort((a, b) => b[1] - a[1])
+    return sorted[0]?.[0] ?? 'other'
+  }
+
+  // Pull one representative accord per fragrance for display
+  const getTopAccord = (item: WardrobeItem): string => {
+    const accords = item.accords || []
+    return accords[0] ?? item.notes?.[0] ?? 'complex'
+  }
+
+  const fragranceProfiles = items.map(item => ({
+    name: item.fragrance_name,
+    dominantFamily: getDominantFamily(item),
+    topAccord: getTopAccord(item),
+  }))
+
+  // Build shared family sentence
+  const allFamilies = fragranceProfiles.map(f => f.dominantFamily)
+  const sharedFamilies = allFamilies.filter((f, i) => allFamilies.indexOf(f) !== i)
+  const uniqueFamilies = [...new Set(allFamilies)]
+
+  // Get the synergy description between the two dominant families
+  const [fA, fB] = uniqueFamilies
+  const synergyDesc =
+    FAMILY_SYNERGY[fA]?.[fB] ??
+    FAMILY_SYNERGY[fB]?.[fA] ??
+    'their contrasting profiles create an unexpected, memorable signature'
+
+  const names = fragranceProfiles.map(f => f.name)
+  const accordList = fragranceProfiles.map(f => f.topAccord).join(' and ')
+
+  if (sharedFamilies.length > 0) {
+    // They share a family — explain resonance
+    const shared = sharedFamilies[0]
+    return `${names.join(' + ')} resonate because both share ${shared} accords, creating a unified ${shared} through-line. The contrast between ${fragranceProfiles[0].topAccord} and ${fragranceProfiles[1]?.topAccord ?? accordList} keeps the stack from feeling one-dimensional.`
+  }
+
+  // Different families — explain the tension/complement
+  return `${names.join(' + ')} work together because ${synergyDesc}. The interplay between ${fragranceProfiles[0].topAccord} and ${fragranceProfiles[1]?.topAccord ?? 'contrasting notes'} gives the stack a complexity neither fragrance achieves alone.`
 }
 
 export function analyzeStack(items: WardrobeItem[], occasionHint?: string): StackAnalysis {
@@ -160,7 +280,6 @@ export function analyzeStack(items: WardrobeItem[], occasionHint?: string): Stac
   }).sort((a, b) => b.score - a.score)
 
   // Determine layering application order (base → middle → top)
-  // Heavier/longer-lasting scents go first
   const heavyAccords = ['oud', 'amber', 'woody', 'vanilla', 'musk', 'spicy']
   const sorted = [...items].sort((a, b) => {
     const aHeavy = (a.accords || []).filter(ac => heavyAccords.some(h => ac.toLowerCase().includes(h))).length
@@ -184,6 +303,9 @@ export function analyzeStack(items: WardrobeItem[], occasionHint?: string): Stac
   const dominantFamilies = noteBreakdown.slice(0, 2).map(n => n.family)
   const stackName = generateStackName(dominantFamilies, occasionScores[0]?.occasion)
 
+  // Generate stack reasoning
+  const stackReasoning = buildStackReasoning(items)
+
   return {
     stackName,
     occasionFit: occasionScores.slice(0, 4),
@@ -191,6 +313,7 @@ export function analyzeStack(items: WardrobeItem[], occasionHint?: string): Stac
     layeringAdvice,
     confidence,
     applicationOrder: sorted.map(i => i.fragrance_name),
+    stackReasoning,
   }
 }
 
@@ -203,13 +326,11 @@ export function buildOccasionStack(wardrobe: WardrobeItem[], occasionKey: string
   const profile = OCCASION_PROFILES[occasionKey]
   if (!profile) throw new Error('Unknown occasion')
 
-  // Score every wardrobe item for this occasion
   const scored = wardrobe.map(item => ({
     item,
     score: scoreFragranceForOccasion(item, occasionKey),
   })).sort((a, b) => b.score - a.score)
 
-  // Take top 1-3 fragrances. Solo if top score is very high, duo/trio otherwise.
   let stack: WardrobeItem[]
   if (scored[0]?.score >= 70) {
     stack = [scored[0].item]
