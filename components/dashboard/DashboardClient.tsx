@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import {
   Sparkles, Plus, Layers, Calendar, LogOut, Star, TrendingUp,
   Dna, Share2, Zap, Brain, CloudSun, ExternalLink, Lock, ArrowRight, PartyPopper, CreditCard,
+  Heart, Trophy,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,10 @@ import DiscoveryFeed from './DiscoveryFeed'
 import StackSuggestions from './StackSuggestions'
 import MoodMatcher from './MoodMatcher'
 import SeasonalRotation from './SeasonalRotation'
+import DailyPulse from './DailyPulse'
+import WishlistPanel from './WishlistPanel'
+import Milestones from './Milestones'
+import StreakTracker from './StreakTracker'
 
 const ROSE        = 'hsl(8 48% 72%)'
 const ROSE_BG     = 'hsl(8 56% 76% / 0.12)'
@@ -49,7 +54,7 @@ interface WardrobeItem {
   [key: string]: unknown
 }
 
-type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna' | 'mood' | 'seasonal'
+type Tab = 'wardrobe' | 'stacks' | 'occasions' | 'discover' | 'dna' | 'mood' | 'seasonal' | 'wishlist' | 'milestones'
 
 const SORT_OPTIONS = [
   { value: 'recent', label: 'Recently Added' },
@@ -219,8 +224,7 @@ function ScentCardPanel({ userId, copied, onCopy }: { userId: string; copied: bo
       <div className="flex items-center gap-2 shrink-0">
         <a
           href={`/u/${userId}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full transition-colors"
           style={{ background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}` }}
         >
@@ -323,13 +327,15 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
     })
 
   const tabs: { id: Tab; label: string; icon: LucideIcon; badge?: number; isNew?: boolean }[] = [
-    { id: 'wardrobe',  label: 'Wardrobe',  icon: Star,       badge: wardrobe.length },
-    { id: 'stacks',    label: 'Stacks',    icon: Layers },
-    { id: 'occasions', label: 'Occasions', icon: Calendar },
-    { id: 'mood',      label: 'Mood',      icon: Brain,      isNew: true },
-    { id: 'seasonal',  label: 'Seasonal',  icon: CloudSun,   isNew: true },
-    { id: 'discover',  label: 'Discover',  icon: TrendingUp },
-    { id: 'dna',       label: 'Scent DNA', icon: Dna },
+    { id: 'wardrobe',   label: 'Wardrobe',   icon: Star,       badge: wardrobe.length },
+    { id: 'stacks',     label: 'Stacks',     icon: Layers },
+    { id: 'occasions',  label: 'Occasions',  icon: Calendar },
+    { id: 'mood',       label: 'Mood',       icon: Brain,      isNew: false },
+    { id: 'seasonal',   label: 'Seasonal',   icon: CloudSun },
+    { id: 'wishlist',   label: 'Wishlist',   icon: Heart,      isNew: true },
+    { id: 'milestones', label: 'Milestones', icon: Trophy,     isNew: true },
+    { id: 'discover',   label: 'Discover',   icon: TrendingUp },
+    { id: 'dna',        label: 'Scent DNA',  icon: Dna },
   ]
 
   const ratedItems = wardrobe.filter(i => i.rating)
@@ -408,6 +414,14 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
       <div className="max-w-6xl mx-auto px-4 py-6">
         {showUpgradedBanner && (
           <UpgradedBanner plan={plan} onDismiss={() => setShowUpgradedBanner(false)} />
+        )}
+
+        {/* ── Streak Tracker — shows after day 2 ── */}
+        <StreakTracker />
+
+        {/* ── Daily Pulse — habit loop trigger ── */}
+        {wardrobe.length > 0 && (
+          <DailyPulse wardrobe={wardrobe} />
         )}
 
         {wardrobe.length > 0 && (
@@ -547,12 +561,14 @@ export default function DashboardClient({ user, wardrobe: initialWardrobe, profi
           </div>
         )}
 
-        {activeTab === 'stacks'    && <StackSuggestions wardrobe={wardrobe} />}
-        {activeTab === 'occasions' && <OccasionPlanner  wardrobe={wardrobe} />}
-        {activeTab === 'mood'      && <MoodMatcher      wardrobe={wardrobe} />}
-        {activeTab === 'seasonal'  && <SeasonalRotation wardrobe={wardrobe} />}
-        {activeTab === 'discover'  && <DiscoveryFeed    wardrobe={wardrobe} />}
-        {activeTab === 'dna'       && <ScentDNA         wardrobe={wardrobe} />}
+        {activeTab === 'stacks'     && <StackSuggestions wardrobe={wardrobe} />}
+        {activeTab === 'occasions'  && <OccasionPlanner  wardrobe={wardrobe} />}
+        {activeTab === 'mood'       && <MoodMatcher      wardrobe={wardrobe} />}
+        {activeTab === 'seasonal'   && <SeasonalRotation wardrobe={wardrobe} />}
+        {activeTab === 'wishlist'   && <WishlistPanel />}
+        {activeTab === 'milestones' && <Milestones       wardrobe={wardrobe} />}
+        {activeTab === 'discover'   && <DiscoveryFeed    wardrobe={wardrobe} />}
+        {activeTab === 'dna'        && <ScentDNA         wardrobe={wardrobe} />}
       </div>
 
       {showAddModal && (

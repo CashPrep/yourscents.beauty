@@ -1,5 +1,5 @@
 'use client'
-import { ShoppingBag, TrendingUp } from 'lucide-react'
+import { ShoppingBag, TrendingUp, ExternalLink } from 'lucide-react'
 
 const ROSE       = 'hsl(340 55% 62%)'
 const ROSE_LIGHT = 'hsl(340 45% 92%)'
@@ -20,6 +20,38 @@ const TRENDING = [
   { id: 'prada-candy',              name: 'Candy',               brand: 'Prada',          image: 'https://fimgs.net/mdimg/perfume/375x500.24263.jpg', accords: ['sweet','powdery','vanilla'],        rank: 12 },
 ]
 
+// Fragrance creator/reviewer accounts for discovery
+const CREATORS = [
+  {
+    handle: '@FragranceReview',
+    platform: 'YouTube',
+    desc: 'In-depth fragrance reviews & blind buys',
+    accent: '#FF0000',
+    url: 'https://www.youtube.com/@FragranceReview',
+  },
+  {
+    handle: '@dreebeauty',
+    platform: 'TikTok',
+    desc: 'Viral perfume rankings & dupes',
+    accent: '#010101',
+    url: 'https://www.tiktok.com/@dreebeauty',
+  },
+  {
+    handle: 'r/fragrance',
+    platform: 'Reddit',
+    desc: 'The largest fragrance community online',
+    accent: '#FF4500',
+    url: 'https://www.reddit.com/r/fragrance',
+  },
+  {
+    handle: 'Fragrantica',
+    platform: 'Web',
+    desc: 'The fragrance encyclopedia & forum',
+    accent: '#8B5CF6',
+    url: 'https://www.fragrantica.com',
+  },
+]
+
 function buildBuyLink(name: string, brand: string): string {
   return `https://www.fragrancenet.com/search#q=${encodeURIComponent(`${brand} ${name}`)}`
 }
@@ -31,10 +63,7 @@ interface WardrobeItem {
   [key: string]: unknown
 }
 
-// Accepts the full wardrobe array (same shape DashboardClient passes)
-// and derives fragrance_ids internally for the "already owned" check.
 export default function DiscoveryFeed({ wardrobe }: { wardrobe: WardrobeItem[] }) {
-  // Match against both the row UUID and the external fragrance_id slug
   const ownedIds = new Set([
     ...wardrobe.map(i => i.id),
     ...wardrobe.map(i => i.fragrance_id).filter(Boolean),
@@ -42,66 +71,93 @@ export default function DiscoveryFeed({ wardrobe }: { wardrobe: WardrobeItem[] }
   const unowned = TRENDING.filter(f => !ownedIds.has(f.id))
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <TrendingUp className="h-4 w-4" style={{ color: ROSE }} />
-        <h3 className="font-bold serif text-base">Trending This Week</h3>
-        <span className="text-xs text-muted-foreground">(fragrances you don&apos;t have yet)</span>
-      </div>
+    <div className="space-y-8">
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {unowned.slice(0, 8).map(frag => (
-          <div key={frag.id} className="bg-card border border-border rounded-2xl p-3 flex flex-col gap-2 hover:shadow-md transition-shadow">
-            <div className="relative">
-              <div className="w-full aspect-square rounded-xl bg-muted/30 overflow-hidden border border-border flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={frag.image}
-                  alt={frag.name}
-                  className="w-full h-full object-contain p-2"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
-              </div>
-              <span
-                className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{ background: ROSE, color: '#fff' }}
-              >
-                #{frag.rank}
-              </span>
-            </div>
-            <div>
-              <p className="font-semibold text-xs serif leading-tight">{frag.name}</p>
-              <p className="text-[10px] text-muted-foreground">{frag.brand}</p>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {frag.accords.slice(0, 2).map(a => (
+      {/* ── Trending ─────────────────────────────────────────── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-4 w-4" style={{ color: ROSE }} />
+          <h3 className="font-bold serif text-base">Trending This Week</h3>
+          <span className="text-xs text-muted-foreground">(fragrances you don&apos;t have yet)</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {unowned.slice(0, 8).map(frag => (
+            <div key={frag.id} className="bg-card border border-border rounded-2xl p-3 flex flex-col gap-2 hover:shadow-md transition-shadow">
+              <div className="relative">
+                <div className="w-full aspect-square rounded-xl bg-muted/30 overflow-hidden border border-border flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={frag.image}
+                    alt={frag.name}
+                    className="w-full h-full object-contain p-2"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                </div>
                 <span
-                  key={a}
-                  className="text-[9px] px-1.5 py-0.5 rounded-full capitalize"
-                  style={{ background: ROSE_LIGHT, color: ROSE_TEXT }}
+                  className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ background: ROSE, color: '#fff' }}
                 >
-                  {a}
+                  #{frag.rank}
                 </span>
-              ))}
+              </div>
+              <div>
+                <p className="font-semibold text-xs serif leading-tight">{frag.name}</p>
+                <p className="text-[10px] text-muted-foreground">{frag.brand}</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {frag.accords.slice(0, 2).map(a => (
+                  <span key={a} className="text-[9px] px-1.5 py-0.5 rounded-full capitalize" style={{ background: ROSE_LIGHT, color: ROSE_TEXT }}>{a}</span>
+                ))}
+              </div>
+              <a
+                href={buildBuyLink(frag.name, frag.brand)}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1 text-[11px] font-semibold w-full py-1.5 rounded-full transition-colors mt-auto"
+                style={{ background: ROSE_LIGHT, color: ROSE_TEXT }}
+              >
+                <ShoppingBag className="h-3 w-3" /> Shop
+              </a>
             </div>
-            <a
-              href={buildBuyLink(frag.name, frag.brand)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1 text-[11px] font-semibold w-full py-1.5 rounded-full transition-colors mt-auto"
-              style={{ background: ROSE_LIGHT, color: ROSE_TEXT }}
-            >
-              <ShoppingBag className="h-3 w-3" /> Shop
-            </a>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {unowned.length === 0 && (
+          <p className="text-center text-muted-foreground text-sm py-6">You already have all the trending fragrances! 👑</p>
+        )}
       </div>
 
-      {unowned.length === 0 && (
-        <p className="text-center text-muted-foreground text-sm py-6">
-          You already have all the trending fragrances! 👑
-        </p>
-      )}
+      {/* ── Creator Integrations ────────────────────────────────── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="text-base">🎥</span>
+          <h3 className="font-bold serif text-base">Fragrance Creators to Follow</h3>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {CREATORS.map(c => (
+            <a
+              key={c.handle}
+              href={c.url}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:shadow-md transition-shadow group"
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                style={{ background: c.accent }}
+              >
+                {c.platform[0]}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{c.handle}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{c.platform}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{c.desc}</p>
+              </div>
+              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 mt-1" />
+            </a>
+          ))}
+        </div>
+      </div>
+
     </div>
   )
 }
