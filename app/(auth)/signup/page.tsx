@@ -6,8 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import OAuthButtons from '@/components/ui/OAuthButtons'
 
-// ── Error boundary ──────────────────────────────────────────────────────────
 class FormErrorBoundary extends Component<
   { children: ReactNode },
   { error: string | null }
@@ -17,29 +17,16 @@ class FormErrorBoundary extends Component<
     this.state = { error: null }
   }
   static getDerivedStateFromError(err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Something went wrong loading this page.'
-    return { error: msg }
+    return { error: err instanceof Error ? err.message : 'Something went wrong loading this page.' }
   }
   render() {
     if (this.state.error) {
       return (
-        <div
-          className="min-h-screen flex items-center justify-center p-4"
-          style={{ background: 'hsl(18 50% 97%)' }}
-        >
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
           <div className="panel-glow w-full max-w-sm p-8 text-center">
-            <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>
-              Couldn&apos;t load the signup form
-            </p>
-            <p className="text-xs mb-4" style={{ color: 'hsl(8 15% 52%)' }}>
-              {this.state.error}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="btn-gold text-xs px-5 py-2"
-            >
-              Try again
-            </button>
+            <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Couldn&apos;t load the signup form</p>
+            <p className="text-xs mb-4" style={{ color: 'hsl(8 15% 52%)' }}>{this.state.error}</p>
+            <button onClick={() => window.location.reload()} className="btn-gold text-xs px-5 py-2">Try again</button>
           </div>
         </div>
       )
@@ -48,30 +35,18 @@ class FormErrorBoundary extends Component<
   }
 }
 
-// ── Env-var guard ────────────────────────────────────────────────────────────
 function EnvGuard({ children }: { children: ReactNode }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) {
-    // Log to browser console so the Vercel deployment log also captures it.
     if (typeof window !== 'undefined') {
-      console.error(
-        '[YourScents] Missing Supabase env vars.\n' +
-        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.'
-      )
+      console.error('[YourScents] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Set them in Vercel → Settings → Environment Variables and redeploy.')
     }
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: 'hsl(18 50% 97%)' }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
         <div className="panel-glow w-full max-w-sm p-8 text-center">
-          <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>
-            Configuration error
-          </p>
-          <p className="text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
-            Missing Supabase environment variables. Please contact support.
-          </p>
+          <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Configuration error</p>
+          <p className="text-xs" style={{ color: 'hsl(8 15% 52%)' }}>Missing Supabase environment variables. Please contact support.</p>
         </div>
       </div>
     )
@@ -95,8 +70,6 @@ function SignupForm() {
     setLoading(true)
     setError('')
 
-    // Lazy-init Supabase client inside the handler so a broken env var
-    // never crashes the component before the user even sees the form.
     let supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>
     try {
       const { createClient } = await import('@/lib/supabase/client')
@@ -107,13 +80,15 @@ function SignupForm() {
       return
     }
 
-    // 1. Create the account
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: name, plan },
-        emailRedirectTo: undefined,
+        // Let Supabase send its default confirmation email.
+        // The callback route at /auth/callback will exchange the code and
+        // redirect to /dashboard automatically.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     })
 
@@ -123,50 +98,40 @@ function SignupForm() {
       return
     }
 
-    // 2. Ensure we have a live session — signUp may not return one on first call
-    if (!data.session) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-      if (signInError) {
-        setError('Account created — please sign in.')
-        router.push('/login')
-        return
+    // If Supabase email confirmation is DISABLED in the dashboard, we get a
+    // live session immediately — handle both paths.
+    if (data.session) {
+      // Confirmed instantly (email confirmation off) — go to dashboard or checkout
+      router.refresh()
+      await new Promise(r => setTimeout(r, 100))
+      if (plan !== 'free') {
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ plan }),
+          })
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}))
+            throw new Error((body as { error?: string }).error || `Checkout failed (${res.status})`)
+          }
+          const { url } = await res.json() as { url: string }
+          if (!url) throw new Error('No checkout URL')
+          window.location.href = url
+        } catch (err: unknown) {
+          setError(`Couldn't open checkout: ${err instanceof Error ? err.message : 'error'}. Please try again.`)
+          setLoading(false)
+        }
+      } else {
+        router.push('/dashboard')
       }
-    }
-
-    // 3. Commit the session cookie to the server before navigating so the
-    //    middleware and /api/checkout can see the authenticated user.
-    router.refresh()
-
-    // 4. Free plan — go straight to dashboard
-    if (plan === 'free') {
-      router.push('/dashboard')
       return
     }
 
-    // 5. Paid plan — short wait for cookie propagation, then POST to /api/checkout
-    await new Promise(r => setTimeout(r, 150))
-
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ plan }),
-      })
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error || `Checkout failed (${res.status})`)
-      }
-
-      const { url } = await res.json() as { url: string }
-      if (!url) throw new Error('No checkout URL returned')
-      window.location.href = url
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong'
-      setError(`Couldn't open checkout: ${msg}. Please try again or contact support.`)
-      setLoading(false)
-    }
+    // Email confirmation is ON — send user to the verify page which polls
+    // for a session and auto-redirects once they click the email link.
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
   }
 
   return (
@@ -192,36 +157,33 @@ function SignupForm() {
         </Link>
 
         <h1 className="text-2xl font-light serif mb-1.5 text-center">Join the girls ✨</h1>
-        <p className="text-sm mb-7 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
+        <p className="text-sm mb-6 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
           {plan !== 'free'
             ? `Getting started with the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan 🌸`
             : 'Start free — no credit card needed 💕'}
         </p>
 
+        {/* OAuth providers */}
+        <OAuthButtons mode="signup" plan={plan} />
+
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px" style={{ background: 'hsl(8 20% 88%)' }} />
+          <span className="text-xs" style={{ color: 'hsl(8 15% 62%)' }}>or with email</span>
+          <div className="flex-1 h-px" style={{ background: 'hsl(8 20% 88%)' }} />
+        </div>
+
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-xs font-medium">Full Name</Label>
-            <Input
-              id="name" placeholder="Your name"
-              value={name} onChange={e => setName(e.target.value)}
-              required className="rounded-xl"
-            />
+            <Input id="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-xs font-medium">Email</Label>
-            <Input
-              id="email" type="email" placeholder="you@example.com"
-              value={email} onChange={e => setEmail(e.target.value)}
-              required className="rounded-xl"
-            />
+            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-xs font-medium">Password</Label>
-            <Input
-              id="password" type="password" placeholder="Min. 8 characters"
-              value={password} onChange={e => setPassword(e.target.value)}
-              minLength={8} required className="rounded-xl"
-            />
+            <Input id="password" type="password" placeholder="Min. 8 characters" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required className="rounded-xl" />
           </div>
 
           {error && (
@@ -239,9 +201,7 @@ function SignupForm() {
 
         <p className="text-center text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>
-            Sign in
-          </Link>
+          <Link href="/login" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>Sign in</Link>
         </p>
         <p className="text-center text-xs mt-2" style={{ color: 'hsl(8 15% 52%)' }}>
           <Link href="/" className="hover:underline opacity-60">← Back to home</Link>

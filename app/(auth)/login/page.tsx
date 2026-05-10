@@ -6,8 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import OAuthButtons from '@/components/ui/OAuthButtons'
 
-// ── Error boundary ──
 class FormErrorBoundary extends Component<
   { children: ReactNode },
   { error: string | null }
@@ -17,29 +17,16 @@ class FormErrorBoundary extends Component<
     this.state = { error: null }
   }
   static getDerivedStateFromError(err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Something went wrong loading this page.'
-    return { error: msg }
+    return { error: err instanceof Error ? err.message : 'Something went wrong loading this page.' }
   }
   render() {
     if (this.state.error) {
       return (
-        <div
-          className="min-h-screen flex items-center justify-center p-4"
-          style={{ background: 'hsl(18 50% 97%)' }}
-        >
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
           <div className="panel-glow w-full max-w-sm p-8 text-center">
-            <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>
-              Couldn&apos;t load the sign-in form
-            </p>
-            <p className="text-xs mb-4" style={{ color: 'hsl(8 15% 52%)' }}>
-              {this.state.error}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="btn-gold text-xs px-5 py-2"
-            >
-              Try again
-            </button>
+            <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Couldn&apos;t load the sign-in form</p>
+            <p className="text-xs mb-4" style={{ color: 'hsl(8 15% 52%)' }}>{this.state.error}</p>
+            <button onClick={() => window.location.reload()} className="btn-gold text-xs px-5 py-2">Try again</button>
           </div>
         </div>
       )
@@ -48,29 +35,18 @@ class FormErrorBoundary extends Component<
   }
 }
 
-// ── Env-var guard ──
 function EnvGuard({ children }: { children: ReactNode }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) {
     if (typeof window !== 'undefined') {
-      console.error(
-        '[YourScents] Missing Supabase env vars.\n' +
-        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.'
-      )
+      console.error('[YourScents] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.')
     }
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: 'hsl(18 50% 97%)' }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'hsl(18 50% 97%)' }}>
         <div className="panel-glow w-full max-w-sm p-8 text-center">
-          <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>
-            Configuration error
-          </p>
-          <p className="text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
-            Missing Supabase environment variables. Please contact support.
-          </p>
+          <p className="text-sm font-semibold mb-2" style={{ color: 'hsl(5 25% 22%)' }}>Configuration error</p>
+          <p className="text-xs" style={{ color: 'hsl(8 15% 52%)' }}>Missing Supabase environment variables. Please contact support.</p>
         </div>
       </div>
     )
@@ -111,9 +87,6 @@ function LoginForm() {
       return
     }
 
-    // router.refresh() re-runs server components with the new session cookie
-    // BEFORE navigating — this prevents the dashboard from seeing a null user
-    // and bouncing the user back to /login in a redirect loop.
     router.refresh()
     await new Promise(r => setTimeout(r, 100))
     router.push(next)
@@ -142,26 +115,27 @@ function LoginForm() {
         </Link>
 
         <h1 className="text-2xl font-light serif mb-1.5 text-center">Welcome back 🌸</h1>
-        <p className="text-sm mb-7 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
+        <p className="text-sm mb-6 text-center" style={{ color: 'hsl(8 15% 52%)' }}>
           Sign in to your fragrance wardrobe
         </p>
+
+        {/* OAuth providers */}
+        <OAuthButtons mode="login" />
+
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px" style={{ background: 'hsl(8 20% 88%)' }} />
+          <span className="text-xs" style={{ color: 'hsl(8 15% 62%)' }}>or with email</span>
+          <div className="flex-1 h-px" style={{ background: 'hsl(8 20% 88%)' }} />
+        </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-xs font-medium">Email</Label>
-            <Input
-              id="email" type="email" placeholder="you@example.com"
-              value={email} onChange={e => setEmail(e.target.value)}
-              required className="rounded-xl"
-            />
+            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-xs font-medium">Password</Label>
-            <Input
-              id="password" type="password" placeholder="Your password"
-              value={password} onChange={e => setPassword(e.target.value)}
-              required className="rounded-xl"
-            />
+            <Input id="password" type="password" placeholder="Your password" value={password} onChange={e => setPassword(e.target.value)} required className="rounded-xl" />
           </div>
 
           {error && (
@@ -183,9 +157,7 @@ function LoginForm() {
 
         <p className="text-center text-xs" style={{ color: 'hsl(8 15% 52%)' }}>
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>
-            Sign up free 🌸
-          </Link>
+          <Link href="/signup" className="font-semibold hover:underline" style={{ color: 'hsl(8 48% 72%)' }}>Sign up free 🌸</Link>
         </p>
         <p className="text-center text-xs mt-2" style={{ color: 'hsl(8 15% 52%)' }}>
           <Link href="/" className="hover:underline opacity-60">← Back to home</Link>
