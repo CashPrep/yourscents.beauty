@@ -53,6 +53,12 @@ function EnvGuard({ children }: { children: ReactNode }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) {
+    if (typeof window !== 'undefined') {
+      console.error(
+        '[YourScents] Missing Supabase env vars.\n' +
+        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.'
+      )
+    }
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4"
@@ -87,8 +93,6 @@ function LoginForm() {
     setLoading(true)
     setError('')
 
-    // Lazy-init: only create the Supabase client when the form is submitted
-    // so a broken env var never crashes the component before render.
     let supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>
     try {
       const { createClient } = await import('@/lib/supabase/client')
@@ -108,8 +112,10 @@ function LoginForm() {
     }
 
     // router.refresh() re-runs server components with the new session cookie
-    // before navigating, preventing an infinite /login redirect loop.
+    // BEFORE navigating — this prevents the dashboard from seeing a null user
+    // and bouncing the user back to /login in a redirect loop.
     router.refresh()
+    await new Promise(r => setTimeout(r, 100))
     router.push(next)
   }
 
