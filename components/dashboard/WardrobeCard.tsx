@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { Trash2, Star, BookOpen, Share2 } from 'lucide-react'
 import RatingModal from './RatingModal'
-import ShopLinks from './ShopLinks'
 
 const ROSE       = 'hsl(340 55% 62%)'
 const ROSE_LIGHT = 'hsl(340 45% 92%)'
@@ -120,7 +119,6 @@ export default function WardrobeCard({ item, onRemove, onRatingUpdate }: Props) 
           <p className="text-[11px] text-muted-foreground leading-relaxed">{noteList.slice(0, 5).join(' · ')}</p>
         )}
 
-        {/* ── Action row ── */}
         <div className="flex gap-2 mt-1 flex-wrap items-center">
           <button
             onClick={() => setShowRating(true)}
@@ -147,11 +145,6 @@ export default function WardrobeCard({ item, onRemove, onRatingUpdate }: Props) 
             <Share2 className="h-3 w-3" />
             {cardCopied ? 'Copied! 🌸' : 'Share'}
           </button>
-
-          {/* ── Affiliate Shop Button (compact dropdown) ── */}
-          <div className="ml-auto">
-            <ShopLinks fragranceName={item.fragrance_name} brand={item.brand} variant="compact" />
-          </div>
         </div>
 
         {showNote && localNote && (

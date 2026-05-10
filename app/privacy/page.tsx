@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'How Your Scents collects, uses, and protects your personal data.',
 }
 
-const UPDATED = 'May 9, 2026'
+const UPDATED = 'May 10, 2026'
 
 export default function PrivacyPage() {
   return (
@@ -41,8 +41,8 @@ export default function PrivacyPage() {
                 what personal data we collect, how we use it, and your rights regarding that data.
               </p>
               <p className="mt-3">
-                For any privacy questions, contact us at{' '}
-                <a href="mailto:support@yourscents.beauty" className="underline hover:text-foreground">support@yourscents.beauty</a>.
+                For any privacy questions, please use the{' '}
+                <Link href="/contact" className="underline hover:text-foreground">contact page</Link>.
               </p>
             </section>
 
@@ -127,8 +127,8 @@ export default function PrivacyPage() {
                 <li><strong className="text-foreground">Withdraw consent</strong> for marketing emails at any time via the unsubscribe link.</li>
               </ul>
               <p className="mt-3">
-                To exercise any of these rights, email{' '}
-                <a href="mailto:support@yourscents.beauty" className="underline hover:text-foreground">support@yourscents.beauty</a>.
+                To exercise any of these rights, please use the{' '}
+                <Link href="/contact" className="underline hover:text-foreground">contact page</Link>.
                 We will respond within 30 days.
               </p>
             </section>
@@ -147,7 +147,8 @@ export default function PrivacyPage() {
               <p>
                 Your Scents is not directed at children under the age of 13. We do not knowingly collect
                 personal data from children under 13. If you believe we have inadvertently collected such
-                data, please contact us immediately.
+                data, please contact us immediately via the{' '}
+                <Link href="/contact" className="underline hover:text-foreground">contact page</Link>.
               </p>
             </section>
 
@@ -163,11 +164,9 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-3">12. Contact</h2>
               <p>
-                If you have any questions about this Privacy Policy or how we handle your data, please contact us:
-              </p>
-              <p className="mt-3">
-                <strong className="text-foreground">Your Scents</strong><br />
-                <a href="mailto:support@yourscents.beauty" className="underline hover:text-foreground">support@yourscents.beauty</a>
+                If you have any questions about this Privacy Policy or how we handle your data, please
+                reach out via the{' '}
+                <Link href="/contact" className="underline hover:text-foreground">contact page</Link>.
               </p>
             </section>
 

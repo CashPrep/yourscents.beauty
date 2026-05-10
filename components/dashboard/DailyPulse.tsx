@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
-import ShopLinks from './ShopLinks'
 
 const ROSE       = 'hsl(340 55% 62%)'
 const ROSE_LIGHT = 'hsl(340 45% 92%)'
@@ -11,13 +10,13 @@ const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Sat
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 const DAY_VIBES: Record<number, { mood: string; prompt: string; emoji: string }> = {
-  0: { mood: 'Relax',       prompt: 'Sunday calls for something cozy and effortless.',           emoji: '☕' },
+  0: { mood: 'Relax',       prompt: 'Sunday calls for something cozy and effortless.',            emoji: '☕' },
   1: { mood: 'Energize',    prompt: 'Start the week strong — reach for something fresh and sharp.', emoji: '⚡' },
-  2: { mood: 'Focus',       prompt: 'Tuesday work mode: clean, professional, and composed.',    emoji: '🎯' },
+  2: { mood: 'Focus',       prompt: 'Tuesday work mode: clean, professional, and composed.',     emoji: '🎯' },
   3: { mood: 'Balance',     prompt: 'Midweek reset — something versatile that works all day.',    emoji: '⚖️' },
-  4: { mood: 'Social',      prompt: 'Thursday energy: warm up for the weekend ahead.',           emoji: '🎉' },
-  5: { mood: 'Bold',        prompt: "Friday night ready — don't hold back.",                     emoji: '🔥' },
-  6: { mood: 'Adventurous', prompt: 'Saturday is yours. Wear something unexpected.',             emoji: '🌍' },
+  4: { mood: 'Social',      prompt: 'Thursday energy: warm up for the weekend ahead.',            emoji: '🎉' },
+  5: { mood: 'Bold',        prompt: "Friday night ready — don't hold back.",                      emoji: '🔥' },
+  6: { mood: 'Adventurous', prompt: 'Saturday is yours. Wear something unexpected.',              emoji: '🌍' },
 }
 
 const SEASON_PICKS: Record<number, string[]> = {
@@ -99,7 +98,7 @@ export default function DailyPulse({ wardrobe }: { wardrobe: any[] }) {
         <p className="text-[11px] mt-1" style={{ color: 'hsl(340 30% 50%)' }}>{vibe.prompt}</p>
       </div>
 
-      <div className="flex gap-2 flex-shrink-0 flex-wrap">
+      <div className="flex gap-2 flex-shrink-0">
         <button onClick={() => setRefreshed(r => r + 1)} className="flex items-center gap-1 text-[11px] font-medium px-3 py-1.5 rounded-full" style={{ background: 'hsl(0 0% 100% / 0.7)', color: ROSE_TEXT }}>
           <RefreshCw className="h-3 w-3" /> Shuffle
         </button>
@@ -107,8 +106,6 @@ export default function DailyPulse({ wardrobe }: { wardrobe: any[] }) {
           style={{ background: pinned === pick.id ? ROSE : 'hsl(0 0% 100% / 0.7)', color: pinned === pick.id ? '#fff' : ROSE_TEXT }}>
           {pinned === pick.id ? '📌 Pinned' : '📌 Pin'}
         </button>
-        {/* Affiliate shop button in daily pulse — high conversion moment */}
-        <ShopLinks fragranceName={pick.fragrance_name} brand={pick.brand} variant="compact" />
       </div>
     </div>
   )

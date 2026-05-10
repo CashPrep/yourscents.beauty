@@ -1,16 +1,15 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Heart, Trash2, Plus } from 'lucide-react'
-import ShopLinks from './ShopLinks'
 
 const ROSE       = 'hsl(340 55% 62%)'
 const ROSE_LIGHT = 'hsl(340 45% 92%)'
 const ROSE_TEXT  = 'hsl(340 55% 48%)'
 
 const PRIORITY_LABELS: Record<string, { label: string; color: string }> = {
-  high:   { label: 'Must Try', color: 'hsl(0 70% 55%)'    },
-  medium: { label: 'Want',     color: ROSE                 },
-  low:    { label: 'Someday',  color: 'hsl(200 50% 50%)'  },
+  high:   { label: 'Must Try', color: 'hsl(0 70% 55%)'   },
+  medium: { label: 'Want',     color: ROSE                },
+  low:    { label: 'Someday',  color: 'hsl(200 50% 50%)' },
 }
 
 interface WishItem {
@@ -51,7 +50,7 @@ export default function WishlistPanel() {
     setName(''); setBrand(''); setNote(''); setPriority('medium'); setAdding(false)
   }
 
-  const remove       = (id: string) => save(items.filter(i => i.id !== id))
+  const remove        = (id: string) => save(items.filter(i => i.id !== id))
   const cyclePriority = (id: string) => {
     const order: ('high'|'medium'|'low')[] = ['high','medium','low']
     save(items.map(i => i.id === id ? { ...i, priority: order[(order.indexOf(i.priority)+1)%3] } : i))
@@ -131,15 +130,11 @@ export default function WishlistPanel() {
                 <p className="text-[11px] text-muted-foreground italic">&ldquo;{item.note}&rdquo;</p>
               )}
 
-              <div className="flex items-center gap-2 mt-auto flex-wrap">
+              <div className="flex items-center gap-2 mt-auto">
                 <button onClick={() => cyclePriority(item.id)} className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                   style={{ background: `${pr.color}22`, color: pr.color, border: `1px solid ${pr.color}44` }} title="Click to change priority">
                   {pr.label}
                 </button>
-                {/* Affiliate shop links — full width for wishlisted items (high buy intent) */}
-                <div className="ml-auto">
-                  <ShopLinks fragranceName={item.name} brand={item.brand} variant="compact" />
-                </div>
               </div>
             </div>
           )
