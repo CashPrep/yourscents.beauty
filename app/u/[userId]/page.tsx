@@ -31,6 +31,29 @@ interface WardrobeRow {
 
 type Props = { params: Promise<{ userId: string }> }
 
+/** Compute a fun "collector score" from 0–100 based on wardrobe diversity + ratings */
+function collectorScore(items: WardrobeRow[]): number {
+  if (items.length === 0) return 0
+  const ratedCount  = items.filter(i => i.rating && i.rating > 0).length
+  const avgRating   = ratedCount
+    ? items.reduce((s, i) => s + (i.rating || 0), 0) / ratedCount
+    : 3
+  const allAccords  = items.flatMap(i => i.accords || [])
+  const uniqueAccords = new Set(allAccords.map(a => a.toLowerCase())).size
+  const diversityScore = Math.min(40, uniqueAccords * 4)
+  const sizeScore      = Math.min(30, items.length * 3)
+  const ratingScore    = Math.round((avgRating / 5) * 30)
+  return Math.min(100, diversityScore + sizeScore + ratingScore)
+}
+
+function scoreLabel(score: number): { label: string; emoji: string; color: string } {
+  if (score >= 85) return { label: 'Elite Collector',    emoji: '💎', color: 'hsl(280 60% 55%)' }
+  if (score >= 65) return { label: 'Scent Connoisseur', emoji: '🌹', color: ROSE_DEEP }
+  if (score >= 45) return { label: 'Fragrance Lover',   emoji: '🌸', color: ROSE }
+  if (score >= 25) return { label: 'Growing Wardrobe',  emoji: '🌱', color: 'hsl(140 45% 48%)' }
+  return { label: 'Just Getting Started', emoji: '✨', color: MUTED }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { userId } = await params
   const supabase   = adminClient()
@@ -48,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const name  = profile?.full_name || 'A Your Scents user'
   const title = `${name}'s Fragrance Wardrobe ✨`
-  const desc  = `${name} is collecting ${count ?? 0} fragrance${count !== 1 ? 's' : ''} on Your Scents. See their wardrobe and discover new scents.`
+  const desc  = `${name} is collecting ${count ?? 0} fragrance${count !== 1 ? 's' : ''} on Your Scents. Rate their collection & discover new scents.`
 
   return {
     title,
@@ -60,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `https://yourscents.beauty/u/${userId}`,
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description: desc,
     },
@@ -85,8 +108,17 @@ export default async function PublicProfilePage({ params }: Props) {
 
   if (!profile || !items) return notFound()
 
-  const name = profile.full_name || 'A Your Scents user'
-  const rows = items as WardrobeRow[]
+  const name  = profile.full_name || 'A Your Scents user'
+  const rows  = items as WardrobeRow[]
+  const score = collectorScore(rows)
+  const { label: tierLabel, emoji: tierEmoji, color: tierColor } = scoreLabel(score)
+
+  const avgRating = rows.filter(i => i.rating).length
+    ? (rows.reduce((s, i) => s + (i.rating || 0), 0) / rows.filter(i => i.rating).length).toFixed(1)
+    : null
+
+  const allAccords    = rows.flatMap(i => i.accords || [])
+  const topAccords    = [...new Map(allAccords.map(a => [a.toLowerCase(), a])).values()].slice(0, 5)
 
   return (
     <div
@@ -124,9 +156,18 @@ export default async function PublicProfilePage({ params }: Props) {
       </header>
 
       <div className="relative max-w-3xl mx-auto px-4 pt-28 pb-16">
-        <div className="text-center mb-10">
+
+        {/* ── Hero Profile Card ──────────────────────────────────────── */}
+        <div
+          className="rounded-3xl p-6 mb-8 text-center"
+          style={{
+            background: 'hsl(0 0% 100%)',
+            border: `1px solid ${ROSE_BORDER}`,
+            boxShadow: `0 8px 40px hsl(8 56% 76% / 0.16)`,
+          }}
+        >
           <div
-            className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold serif"
+            className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold serif"
             style={{ background: ROSE_BG, border: `2px solid ${ROSE_BORDER}`, color: ROSE_DEEP }}
           >
             {name.charAt(0).toUpperCase()}
@@ -134,11 +175,61 @@ export default async function PublicProfilePage({ params }: Props) {
           <h1 className="text-2xl font-light serif mb-1" style={{ color: FOREGROUND }}>
             {name}&apos;s Fragrance Wardrobe
           </h1>
-          <p className="text-sm" style={{ color: MUTED }}>
-            ✨ {rows.length} fragrance{rows.length !== 1 ? 's' : ''} · Curated on Your Scents
+          <p className="text-sm mb-5" style={{ color: MUTED }}>
+            {rows.length} fragrance{rows.length !== 1 ? 's' : ''} · Curated on Your Scents
           </p>
+
+          {/* ── Rate My Collection Score ─────────────────────────────── */}
+          <div
+            className="inline-flex flex-col items-center gap-1 px-6 py-4 rounded-2xl mb-4"
+            style={{ background: ROSE_BG, border: `1px solid ${ROSE_BORDER}` }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: MUTED }}>Collection Score</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-bold serif" style={{ color: tierColor }}>{score}</span>
+              <span className="text-lg" style={{ color: MUTED }}>/100</span>
+            </div>
+            <p className="text-sm font-medium" style={{ color: tierColor }}>{tierEmoji} {tierLabel}</p>
+            {/* Score bar */}
+            <div className="w-48 h-2 rounded-full mt-2" style={{ background: 'hsl(10 30% 88%)' }}>
+              <div
+                className="h-2 rounded-full transition-all"
+                style={{ width: `${score}%`, background: `linear-gradient(90deg, ${ROSE}, ${tierColor})` }}
+              />
+            </div>
+          </div>
+
+          {/* ── Quick Stats Row ──────────────────────────────────────── */}
+          <div className="grid grid-cols-3 gap-3 mt-4">
+            {[
+              { label: 'Bottles',      value: `${rows.length}` },
+              { label: 'Avg Rating',   value: avgRating ? `${avgRating} ★` : '—' },
+              { label: 'Unique Accords', value: `${new Set(allAccords.map(a => a.toLowerCase())).size}` },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-xl p-3" style={{ background: 'hsl(10 30% 96%)' }}>
+                <p className="text-xs" style={{ color: MUTED }}>{label}</p>
+                <p className="text-base font-semibold serif" style={{ color: FOREGROUND }}>{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {topAccords.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1.5 mt-4">
+              {topAccords.map(a => (
+                <span
+                  key={a}
+                  className="text-[11px] px-2.5 py-1 rounded-full capitalize"
+                  style={{ background: ROSE_BG, color: ROSE_DEEP, border: `1px solid ${ROSE_BORDER}` }}
+                >{a}</span>
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* ── TikTok / Share CTA ───────────────────────────────────── */}
+        <ShareBanner name={name} score={score} tierLabel={tierLabel} tierEmoji={tierEmoji} userId={userId} />
+
+        {/* ── Wardrobe Grid ────────────────────────────────────────── */}
         {rows.length === 0 ? (
           <p className="text-center py-20" style={{ color: MUTED }}>This wardrobe is empty 🌸</p>
         ) : (
@@ -195,3 +286,10 @@ export default async function PublicProfilePage({ params }: Props) {
     </div>
   )
 }
+
+// ── Client island: copy-link + TikTok caption ──────────────────────────────
+// This is a tiny client component embedded in the otherwise-static page
+// so we keep the whole page as a server component (no 'use client' at top).
+
+import ShareBannerClient from './ShareBanner'
+const ShareBanner = ShareBannerClient

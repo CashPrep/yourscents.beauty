@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Trash2, Star, ShoppingBag, BookOpen } from 'lucide-react'
+import { Trash2, Star, ShoppingBag, BookOpen, Share2 } from 'lucide-react'
 import RatingModal from './RatingModal'
 
 const ROSE       = 'hsl(340 55% 62%)'
@@ -12,7 +12,6 @@ function buildBuyLink(name: string, brand: string): string {
   return `https://www.fragrancenet.com/search#q=${q}`
 }
 
-// notes can be a flat string[] (legacy rows) or the structured object added in Step 15.
 function flatNotes(notes: string[] | { top?: string[]; middle?: string[]; base?: string[] } | undefined): string[] {
   if (!notes) return []
   if (Array.isArray(notes)) return notes
@@ -41,15 +40,31 @@ interface Props {
 }
 
 export default function WardrobeCard({ item, onRemove, onRatingUpdate }: Props) {
-  const [showRating, setShowRating] = useState(false)
-  const [showNote,   setShowNote]   = useState(false)
-  const [localRating, setLocalRating] = useState<number>(item.rating || 0)
-  const [localNote,   setLocalNote]   = useState<string>(item.personal_note || '')
+  const [showRating,   setShowRating]   = useState(false)
+  const [showNote,     setShowNote]     = useState(false)
+  const [localRating,  setLocalRating]  = useState<number>(item.rating || 0)
+  const [localNote,    setLocalNote]    = useState<string>(item.personal_note || '')
+  const [cardCopied,   setCardCopied]   = useState(false)
 
   const handleRatingSaved = (id: string, rating: number, note: string) => {
     setLocalRating(rating)
     setLocalNote(note)
     onRatingUpdate?.(id, rating, note)
+  }
+
+  const handleShareCard = () => {
+    // Build a shareable text snippet for this single fragrance
+    const stars     = localRating ? '★'.repeat(localRating) + '☆'.repeat(5 - localRating) : ''
+    const accords   = (item.accords || []).slice(0, 3).join(', ')
+    const ratingLine = localRating ? `\nMy rating: ${stars}` : ''
+    const noteLine   = localNote   ? `\n"${localNote}"` : ''
+    const text =
+      `🌸 ${item.fragrance_name} by ${item.brand}${ratingLine}${noteLine}` +
+      (accords ? `\nAccords: ${accords}` : '') +
+      `\n\nSee my full wardrobe on Your Scents ✨`
+    navigator.clipboard.writeText(text)
+    setCardCopied(true)
+    setTimeout(() => setCardCopied(false), 2500)
   }
 
   const noteList = flatNotes(item.notes)
@@ -115,7 +130,7 @@ export default function WardrobeCard({ item, onRemove, onRatingUpdate }: Props) 
           <p className="text-[11px] text-muted-foreground leading-relaxed">{noteList.slice(0, 5).join(' · ')}</p>
         )}
 
-        <div className="flex gap-2 mt-1">
+        <div className="flex gap-2 mt-1 flex-wrap">
           <button
             onClick={() => setShowRating(true)}
             className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full transition-colors"
@@ -131,6 +146,16 @@ export default function WardrobeCard({ item, onRemove, onRatingUpdate }: Props) 
               <BookOpen className="h-3 w-3" /> Note
             </button>
           )}
+          {/* ── Shareable Card Button ── */}
+          <button
+            onClick={handleShareCard}
+            className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full transition-colors"
+            style={{ background: cardCopied ? 'hsl(140 45% 90%)' : ROSE_LIGHT, color: cardCopied ? 'hsl(140 45% 35%)' : ROSE_TEXT }}
+            title="Copy shareable scent card"
+          >
+            <Share2 className="h-3 w-3" />
+            {cardCopied ? 'Copied! 🌸' : 'Share'}
+          </button>
           <a
             href={buildBuyLink(item.fragrance_name, item.brand)}
             target="_blank"
