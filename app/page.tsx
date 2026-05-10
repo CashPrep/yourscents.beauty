@@ -531,9 +531,9 @@ function LiveSearchSection() {
                 <span className="font-semibold text-foreground">Stack tip:</span>{' '}
                 Apply the heaviest base notes first, wait 2–3 minutes between each layer. Sign up to unlock full compatibility scoring for this combination.
               </p>
-              <Link href="/signup">
-                <button className="btn-gold mt-3 px-5 py-2 text-xs">Get Full Analysis →</button>
-              </Link>
+              <a href="/signup" className="inline-block mt-3">
+                <button className="btn-gold px-5 py-2 text-xs">Get Full Analysis →</button>
+              </a>
             </div>
           )}
         </div>
@@ -638,19 +638,19 @@ export default function HomePage() {
       {/* ── NAV ── */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-0">
+          <a href="/" className="flex items-center gap-0">
             <Image src="/logo.png" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" priority />
-          </Link>
+          </a>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <Link href="#stack"      className="hover:text-foreground transition-colors">Stack Builder</Link>
-            <Link href="#fragrances" className="hover:text-foreground transition-colors">Fragrances</Link>
-            <Link href="#tips"       className="hover:text-foreground transition-colors">Layering Tips</Link>
-            <Link href="#pricing"    className="hover:text-foreground transition-colors">Pricing</Link>
-            <Link href="/blog"       className="hover:text-foreground transition-colors">Guides</Link>
+            <a href="#stack"      className="hover:text-foreground transition-colors">Stack Builder</a>
+            <a href="#fragrances" className="hover:text-foreground transition-colors">Fragrances</a>
+            <a href="#tips"       className="hover:text-foreground transition-colors">Layering Tips</a>
+            <a href="#pricing"    className="hover:text-foreground transition-colors">Pricing</a>
+            <a href="/blog"       className="hover:text-foreground transition-colors">Guides</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Sign in</Link>
-            <Link href="/signup"><button className="btn-gold px-5 py-2 text-xs">Start Free</button></Link>
+            <a href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Sign in</a>
+            <a href="/signup"><button className="btn-gold px-5 py-2 text-xs">Start Free</button></a>
           </div>
         </div>
       </header>
@@ -676,18 +676,17 @@ export default function HomePage() {
                 Your Scents decodes every note in your collection and tells you exactly how to stack them — by vibe, occasion, or chemistry. No guesswork.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3 mb-14">
-                <Link href="/signup">
+                <a href="/signup">
                   <button className="btn-gold px-8 py-3 text-sm">Build My Wardrobe — Free</button>
-                </Link>
-                <Link href="#stack" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors h-11 px-2 group">
+                </a>
+                <a href="#stack" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors h-11 px-2 group">
                   Try the stack builder
                   <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                </Link>
+                </a>
               </div>
             </div>
             <div className="relative hidden md:block">
               <div className="aspect-[4/5] w-full max-w-sm ml-auto overflow-hidden rounded-2xl" style={{ boxShadow: '0 32px 80px hsl(8 30% 60% / 0.22)' }}>
-                {/* LCP image — priority loads eagerly, no layout shift */}
                 <Image
                   src={PHOTOS.hero}
                   alt="Fragrance collection"
@@ -1019,12 +1018,13 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href={plan.href}>
+                  {/* Use native <a> so navigation works even before JS hydration */}
+                  <a href={plan.href} className="block">
                     {plan.highlighted
                       ? <button className="btn-gold w-full py-3 text-xs">{plan.cta}</button>
                       : <button className="w-full py-3 text-xs font-semibold rounded-full border border-border hover:border-rose-300 transition-colors">{plan.cta}</button>
                     }
-                  </Link>
+                  </a>
                 </div>
               ))}
             </div>
@@ -1066,9 +1066,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── FINAL CTA — full-bleed banner ── */}
+        {/* ── FINAL CTA ── */}
         <section className="relative overflow-hidden" style={{ minHeight: '420px' }}>
-          {/* Background image — full bleed, no container constraints */}
           <Image
             src={PHOTOS.ctaBg}
             alt=""
@@ -1078,7 +1077,6 @@ export default function HomePage() {
             style={{ filter: 'brightness(0.55) saturate(0.7)' }}
             loading="lazy"
           />
-          {/* Gradient overlay + content */}
           <div
             className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-24"
             style={{ background: 'linear-gradient(to top, hsl(3 40% 25% / 0.92), hsl(3 40% 25% / 0.35) 60%, transparent)' }}
@@ -1089,9 +1087,9 @@ export default function HomePage() {
             <p className="text-white/70 text-sm mb-9 max-w-md leading-relaxed">
               Start free. Add your collection. Discover combinations you never knew existed.
             </p>
-            <Link href="/signup">
+            <a href="/signup">
               <button className="btn-gold px-10 py-3 text-sm">Build My Wardrobe</button>
-            </Link>
+            </a>
           </div>
         </section>
 
@@ -1106,10 +1104,10 @@ export default function HomePage() {
               <p className="text-xs text-muted-foreground">The intelligent fragrance wardrobe.</p>
             </div>
             <div className="flex gap-6 text-xs text-muted-foreground">
-              <Link href="/blog"    className="hover:text-foreground transition-colors">Guides</Link>
-              <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-              <Link href="/terms"   className="hover:text-foreground transition-colors">Terms</Link>
-              <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+              <a href="/blog"    className="hover:text-foreground transition-colors">Guides</a>
+              <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="/terms"   className="hover:text-foreground transition-colors">Terms</a>
+              <a href="/contact" className="hover:text-foreground transition-colors">Contact</a>
             </div>
           </div>
           <div className="rule opacity-30" />

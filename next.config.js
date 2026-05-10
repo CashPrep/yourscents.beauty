@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-// ── Production environment validation ───────────────────────────────────────
 const isProd = process.env.NODE_ENV === 'production'
 
 if (isProd) {
@@ -17,16 +16,19 @@ if (isProd) {
   ]
   const missing = required.filter(k => !process.env[k])
   if (missing.length) {
-    throw new Error(
-      `[yourscents.beauty] Missing required environment variables:\n  ${missing.join('\n  ')}\n` +
+    // Warn but do NOT throw — let the site build and serve static/marketing
+    // pages even if payment/auth env vars aren't wired yet. API routes
+    // validate their own required vars at runtime.
+    console.warn(
+      `[yourscents.beauty] WARNING: Missing environment variables:\n  ${missing.join('\n  ')}\n` +
       `Set them in Vercel → Settings → Environment Variables.`
     )
   }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
-  if (appUrl.includes('localhost')) {
-    throw new Error(
-      `[yourscents.beauty] NEXT_PUBLIC_APP_URL is set to "${appUrl}" in production.\n` +
-      `It must be your live domain, e.g. https://yourscents.beauty`
+  if (appUrl && appUrl.includes('localhost')) {
+    console.warn(
+      `[yourscents.beauty] WARNING: NEXT_PUBLIC_APP_URL is set to "${appUrl}" in production.\n` +
+      `It should be your live domain, e.g. https://yourscents.beauty`
     )
   }
 }
@@ -35,14 +37,12 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: false },
   eslint:     { ignoreDuringBuilds: false },
 
-  // ── Tree-shake large icon/component libraries so only used exports are bundled
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 
-  // ── Strip console.* calls in production builds
   compiler: {
-    removeConsole: isProd ? { exclude: ['error'] } : false,
+    removeConsole: isProd ? { exclude: ['error', 'warn'] } : false,
   },
 
   images: {
@@ -54,25 +54,20 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
-      // Unsplash hero/CTA images served via next/image
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
-    // Prefer AVIF → WebP for ~30% smaller images
     formats: ['image/avif', 'image/webp'],
   },
 
-  // ── Aggressive static-asset caching & security headers
   async headers() {
     return [
       {
-        // Cache immutable JS/CSS chunks for 1 year
         source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {
-        // Cache public assets (logo, og-image, etc.) for 7 days
         source: '/:path((?!_next).*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
