@@ -16,7 +16,6 @@ const R_DEEP   = 'hsl(3 40% 58%)'
 const R_BG     = 'hsl(8 56% 76% / 0.12)'
 const R_BORDER = 'hsl(8 56% 76% / 0.32)'
 
-// helper: given e.g. 'hsl(190 45% 58%)' returns 'hsl(190 45% 58% / 0.09)'
 function hslA(color: string, alpha: number) {
   return color.replace(')', ` / ${alpha})`)
 }
@@ -432,7 +431,7 @@ function LiveSearchSection() {
                 style={{ borderColor: 'hsl(10 25% 92%)' }}
               >
                 {f.image_url ? (
-                  <img src={f.image_url} alt={f.name} className="w-9 h-9 rounded-lg object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} />
+                  <img src={f.image_url} alt={f.name} className="w-9 h-9 rounded-lg object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} loading="lazy" />
                 ) : (
                   <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: R_BG }}>
                     <FlaskConical size={14} style={{ color: R }} strokeWidth={1.5} />
@@ -456,7 +455,7 @@ function LiveSearchSection() {
         <div className="panel-glow p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-start gap-4">
             {selected.image_url ? (
-              <img src={selected.image_url} alt={selected.name} className="w-16 h-20 rounded-xl object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} />
+              <img src={selected.image_url} alt={selected.name} className="w-16 h-20 rounded-xl object-cover shrink-0" style={{ background: 'hsl(10 40% 95%)' }} loading="lazy" />
             ) : (
               <div className="w-16 h-20 rounded-xl shrink-0 flex items-center justify-center" style={{ background: R_BG }}>
                 <FlaskConical size={22} style={{ color: R }} strokeWidth={1.5} />
@@ -517,7 +516,7 @@ function LiveSearchSection() {
               <div key={f.id} className="flex items-center gap-2">
                 {i > 0 && <span className="text-xs font-light" style={{ color: R_DEEP }}>+</span>}
                 <div className="flex items-center gap-2 bg-card rounded-full pl-2 pr-3 py-1.5 border" style={{ borderColor: R_BORDER }}>
-                  {f.image_url && <img src={f.image_url} alt={f.name} className="w-5 h-5 rounded-full object-cover" />}
+                  {f.image_url && <img src={f.image_url} alt={f.name} className="w-5 h-5 rounded-full object-cover" loading="lazy" />}
                   <span className="text-[12px] font-medium">{f.name}</span>
                   <button onClick={() => removeFromStack(f.id)} className="text-muted-foreground hover:text-foreground ml-0.5">
                     <X size={10} />
@@ -640,7 +639,7 @@ export default function HomePage() {
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-0">
-            <Image src="/logo.png" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" />
+            <Image src="/logo.png" alt="Your Scents Logo" width={120} height={48} className="h-12 w-auto object-contain" priority />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <Link href="#stack"      className="hover:text-foreground transition-colors">Stack Builder</Link>
@@ -688,7 +687,16 @@ export default function HomePage() {
             </div>
             <div className="relative hidden md:block">
               <div className="aspect-[4/5] w-full max-w-sm ml-auto overflow-hidden rounded-2xl" style={{ boxShadow: '0 32px 80px hsl(8 30% 60% / 0.22)' }}>
-                <img src={PHOTOS.hero} alt="Fragrance collection" className="w-full h-full object-cover" style={{ filter: 'brightness(0.92) saturate(0.9)' }} />
+                {/* LCP image — priority loads eagerly, no layout shift */}
+                <Image
+                  src={PHOTOS.hero}
+                  alt="Fragrance collection"
+                  fill
+                  sizes="(max-width: 768px) 0px, 384px"
+                  className="object-cover"
+                  style={{ filter: 'brightness(0.92) saturate(0.9)' }}
+                  priority
+                />
               </div>
               <div className="glass absolute -bottom-6 -left-8 px-5 py-4 min-w-[168px]">
                 <p className="eyebrow mb-2.5">Note Analysis</p>
@@ -1060,9 +1068,18 @@ export default function HomePage() {
         <section className="py-8 px-6 pb-16">
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden">
-              <img src={PHOTOS.ctaBg} alt="" className="w-full h-72 object-cover" style={{ filter: 'brightness(0.55) saturate(0.7)' }} />
+              {/* CTA background — lazy loaded, below the fold */}
+              <Image
+                src={PHOTOS.ctaBg}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 896px"
+                className="object-cover"
+                style={{ filter: 'brightness(0.55) saturate(0.7)' }}
+                loading="lazy"
+              />
               <div
-                className="absolute inset-0 flex flex-col items-center justify-end pb-14 px-8 text-center"
+                className="relative h-72 flex flex-col items-center justify-end pb-14 px-8 text-center"
                 style={{ background: 'linear-gradient(to top, hsl(3 40% 25% / 0.92), hsl(3 40% 25% / 0.35) 55%, transparent)' }}
               >
                 <h2 className="text-4xl md:text-5xl font-normal text-white serif mb-4 text-balance">
@@ -1086,7 +1103,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
             <div>
-              <Image src="/logo.png" alt="Your Scents Logo" width={48} height={48} className="h-12 w-12 object-contain mb-2" />
+              <Image src="/logo.png" alt="Your Scents Logo" width={48} height={48} className="h-12 w-12 object-contain mb-2" loading="lazy" />
               <p className="text-xs text-muted-foreground">The intelligent fragrance wardrobe.</p>
             </div>
             <div className="flex gap-6 text-xs text-muted-foreground">

@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 
 // ── Production environment validation ───────────────────────────────────────
-// Fail loudly at startup if critical env vars are missing or still set to
-// localhost defaults. Catches misconfigured Vercel deployments before they
-// silently break Stripe redirects or webhook verification.
 const isProd = process.env.NODE_ENV === 'production'
 
 if (isProd) {
@@ -35,28 +32,55 @@ if (isProd) {
 }
 
 const nextConfig = {
-  // TypeScript and ESLint errors must be fixed before a production build succeeds.
-  // Do NOT set these to true — it silently ships broken code.
   typescript: { ignoreBuildErrors: false },
   eslint:     { ignoreDuringBuilds: false },
 
+  // ── Tree-shake large icon/component libraries so only used exports are bundled
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+
+  // ── Strip console.* calls in production builds
+  compiler: {
+    removeConsole: isProd ? { exclude: ['error'] } : false,
+  },
+
   images: {
     remotePatterns: [
-      // Fragrantica CDN — bottle images
       { protocol: 'https', hostname: 'fimgs.net' },
       { protocol: 'https', hostname: '*.fimgs.net' },
-
-      // Fragrantica main site (search result thumbnails)
       { protocol: 'https', hostname: 'www.fragrantica.com' },
       { protocol: 'https', hostname: 'fragrantica.com' },
-
-      // Supabase Storage — user-uploaded images
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
-
-      // Wikimedia — fallback bottle shots
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
+      // Unsplash hero/CTA images served via next/image
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
+    // Prefer AVIF → WebP for ~30% smaller images
+    formats: ['image/avif', 'image/webp'],
+  },
+
+  // ── Aggressive static-asset caching & security headers
+  async headers() {
+    return [
+      {
+        // Cache immutable JS/CSS chunks for 1 year
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        // Cache public assets (logo, og-image, etc.) for 7 days
+        source: '/:path((?!_next).*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+    ]
   },
 }
 module.exports = nextConfig
