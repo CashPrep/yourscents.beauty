@@ -955,17 +955,19 @@ export default function HomePage() {
               </div>
             </div>
             <p className="eyebrow mb-3">Why I Built This</p>
-            <h2 className="text-3xl md:text-4xl font-normal serif mb-10" style={{ color: R_DEEP }}>Built with love.</h2>
+            <h2 className="text-3xl md:text-4xl font-normal serif mb-10" style={{ color: R_DEEP }}>A personal project that became something more.</h2>
             <div
               className="rounded-3xl px-10 py-10 text-left space-y-6 relative overflow-hidden"
               style={{ background: 'hsl(0 0% 100%)', border: `1px solid ${R_BORDER}`, boxShadow: `0 20px 60px hsl(8 56% 76% / 0.15), 0 2px 8px hsl(8 56% 76% / 0.08)` }}
             >
               <div className="absolute inset-x-0 top-0 h-1 rounded-t-3xl" style={{ background: `linear-gradient(90deg, transparent, ${R}, transparent)` }} />
               <p className="text-[16px] leading-[1.85] text-foreground font-normal">
-                I built this in honor of the most amazing girl in the entire world. She is brilliant, caring, loving, thoughtful — I could go on forever, but in short I love this girl.
+                I started Your Scents as a gift for someone I care about deeply. Creating custom fragrance combinations for her made me realize how genuinely hard it is to find scents that feel personal — not just something pulled off a shelf, but something that actually feels like <em>you</em>.
               </p>
               <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${R_BORDER}, transparent)` }} />
-              <p className="text-[16px] leading-[1.85] text-foreground italic serif">P.S. I love you to the moon and back 🌙</p>
+              <p className="text-[16px] leading-[1.85] text-foreground font-normal">
+                That experience stuck with me. So I built the tool I wish had existed — one that takes your actual collection and helps you layer it into something that feels truly yours. Now I&apos;m a little obsessed with helping other people find that same thing.
+              </p>
             </div>
           </div>
         </section>
