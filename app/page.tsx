@@ -1064,35 +1064,32 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── FINAL CTA ── */}
-        <section className="py-8 px-6 pb-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden">
-              {/* CTA background — lazy loaded, below the fold */}
-              <Image
-                src={PHOTOS.ctaBg}
-                alt=""
-                fill
-                sizes="(max-width: 1024px) 100vw, 896px"
-                className="object-cover"
-                style={{ filter: 'brightness(0.55) saturate(0.7)' }}
-                loading="lazy"
-              />
-              <div
-                className="relative h-72 flex flex-col items-center justify-end pb-14 px-8 text-center"
-                style={{ background: 'linear-gradient(to top, hsl(3 40% 25% / 0.92), hsl(3 40% 25% / 0.35) 55%, transparent)' }}
-              >
-                <h2 className="text-4xl md:text-5xl font-normal text-white serif mb-4 text-balance">
-                  Your signature stack is already in your wardrobe.
-                </h2>
-                <p className="text-white/70 text-sm mb-9 max-w-md leading-relaxed">
-                  Start free. Add your collection. Discover combinations you never knew existed.
-                </p>
-                <Link href="/signup">
-                  <button className="btn-gold px-10 py-3 text-sm">Build My Wardrobe</button>
-                </Link>
-              </div>
-            </div>
+        {/* ── FINAL CTA — full-bleed banner ── */}
+        <section className="relative overflow-hidden" style={{ minHeight: '420px' }}>
+          {/* Background image — full bleed, no container constraints */}
+          <Image
+            src={PHOTOS.ctaBg}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+            style={{ filter: 'brightness(0.55) saturate(0.7)' }}
+            loading="lazy"
+          />
+          {/* Gradient overlay + content */}
+          <div
+            className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-24"
+            style={{ background: 'linear-gradient(to top, hsl(3 40% 25% / 0.92), hsl(3 40% 25% / 0.35) 60%, transparent)' }}
+          >
+            <h2 className="text-4xl md:text-5xl font-normal text-white serif mb-4 text-balance max-w-2xl">
+              Your signature stack is already in your wardrobe.
+            </h2>
+            <p className="text-white/70 text-sm mb-9 max-w-md leading-relaxed">
+              Start free. Add your collection. Discover combinations you never knew existed.
+            </p>
+            <Link href="/signup">
+              <button className="btn-gold px-10 py-3 text-sm">Build My Wardrobe</button>
+            </Link>
           </div>
         </section>
 
