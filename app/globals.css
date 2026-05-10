@@ -18,33 +18,33 @@
   :root {
     /* ── Core surfaces ── */
     --background:          18 50% 97%;          /* #FDF0EC cream */
-    --foreground:          5 25% 22%;           /* warm near-black */
+    --foreground:          5 25% 18%;           /* warm near-black — darkened for contrast */
     --card:                0 0% 100%;           /* pure white cards */
-    --card-foreground:     5 25% 22%;
+    --card-foreground:     5 25% 18%;
     --popover:             0 0% 100%;
-    --popover-foreground:  5 25% 22%;
+    --popover-foreground:  5 25% 18%;
 
     /* ── Brand ── */
-    --primary:             8 48% 72%;           /* dusty rose #E8A89C */
+    --primary:             3 42% 42%;           /* darkened rose — passes 4.5:1 on white */
     --primary-foreground:  0 0% 100%;
     --secondary:           10 60% 92%;          /* light petal */
-    --secondary-foreground: 3 35% 45%;
+    --secondary-foreground: 3 35% 28%;          /* darkened for 4.5:1 on light petal */
 
     /* ── UI chrome ── */
     --muted:               18 40% 93%;
-    --muted-foreground:    8 15% 52%;
+    --muted-foreground:    8 15% 38%;           /* darkened from 52% to 38% lightness */
     --accent:              10 55% 88%;
-    --accent-foreground:   3 35% 40%;
-    --destructive:         0 65% 60%;
+    --accent-foreground:   3 40% 25%;           /* darkened for 4.5:1 on accent bg */
+    --destructive:         0 65% 45%;           /* darkened for better contrast */
     --destructive-foreground: 0 0% 100%;
     --border:              10 30% 88%;
     --input:               10 30% 88%;
-    --ring:                8 48% 72%;
+    --ring:                3 42% 42%;
     --radius:              1rem;
 
     /* ── Custom tokens ── */
-    --rose:                8 48% 72%;           /* primary dusty rose */
-    --rose-deep:           3 40% 58%;           /* mauve rose */
+    --rose:                8 48% 72%;           /* visual rose (decorative only) */
+    --rose-deep:           3 42% 36%;           /* darkened for text use — passes 4.5:1 on white */
     --rose-light:          10 60% 92%;          /* petal pink */
     --rose-cream:          18 50% 97%;          /* background cream */
     --rose-mid:            10 55% 84%;          /* soft blush */
@@ -80,9 +80,9 @@
   .text-balance { text-wrap: balance; }
 
   /* ── Rose text helpers ── */
-  .text-rose  { color: hsl(var(--rose)); }
+  .text-rose  { color: hsl(var(--rose-deep)); }
   .text-rose-gradient {
-    background: linear-gradient(135deg, hsl(10 60% 80%) 0%, hsl(3 40% 58%) 100%);
+    background: linear-gradient(135deg, hsl(3 42% 42%) 0%, hsl(3 42% 32%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -95,20 +95,20 @@
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: hsl(var(--rose-deep));
+    color: hsl(var(--rose-deep));   /* now hsl(3 42% 36%) — passes 4.5:1 on white */
   }
 
   /* ── Chips ── */
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium;
     background: hsl(8 56% 76% / 0.14);
-    color: hsl(var(--rose-deep));
+    color: hsl(3 42% 30%);          /* darkened from rose-deep for chip bg contrast */
     border: 1px solid hsl(8 56% 76% / 0.32);
   }
   .chip-muted {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium;
     background: hsl(18 40% 93%);
-    color: hsl(8 15% 52%);
+    color: hsl(8 15% 30%);          /* darkened from 52% to 30% lightness — passes 4.5:1 */
     border: 1px solid hsl(10 25% 86%);
   }
 
@@ -162,7 +162,7 @@
 
   /* ── Primary button ── */
   .btn-gold {
-    background: linear-gradient(135deg, hsl(8 52% 74%) 0%, hsl(3 42% 60%) 100%);
+    background: linear-gradient(135deg, hsl(3 42% 42%) 0%, hsl(3 42% 34%) 100%);
     color: hsl(0 0% 100%);
     font-weight: 600;
     border-radius: 999px;
@@ -181,7 +181,7 @@
   .score-bar-fill {
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, hsl(8 48% 72%), hsl(10 60% 82%));
+    background: linear-gradient(90deg, hsl(3 42% 42%), hsl(10 60% 62%));
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -213,7 +213,7 @@
 
   /* ── Blog / article prose ── */
   .prose-article {
-    color: hsl(5 20% 38%);
+    color: hsl(5 20% 25%);          /* darkened from 38% to 25% — clear 4.5:1 on white */
     font-size: 1rem;
     line-height: 1.8;
   }
@@ -222,7 +222,7 @@
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.6rem;
     font-weight: 400;
-    color: hsl(5 25% 22%);
+    color: hsl(5 25% 18%);          /* darkened foreground */
     margin-top: 3rem;
     margin-bottom: 1rem;
     letter-spacing: -0.01em;
@@ -231,7 +231,7 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
-    color: hsl(var(--rose-deep));
+    color: hsl(var(--rose-deep));   /* now hsl(3 42% 36%) */
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin-top: 2rem;
@@ -246,7 +246,7 @@
     padding-left: 1.25rem;
     position: relative;
     margin-bottom: 0.75rem;
-    color: hsl(5 18% 45%);
+    color: hsl(5 18% 28%);          /* darkened from 45% to 28% — passes 4.5:1 on white */
   }
   .prose-article ul li::before {
     content: '';
@@ -258,7 +258,7 @@
     border-radius: 50%;
     background: hsl(var(--rose));
   }
-  .prose-article strong { color: hsl(5 25% 22%); font-weight: 600; }
+  .prose-article strong { color: hsl(5 25% 18%); font-weight: 600; }
 
   /* ── Callout block ── */
   .callout {
@@ -277,7 +277,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: hsl(var(--rose-deep)) !important;
+    color: hsl(var(--rose-deep)) !important;  /* hsl(3 42% 36%) on hsl(10 60% 96%) — passes */
     margin-bottom: 0.75rem !important;
   }
 
